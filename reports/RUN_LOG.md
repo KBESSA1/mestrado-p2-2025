@@ -15,3 +15,4 @@
 - Modelos rodados: **Naïve**, **Linear**, **GB (sklearn)**, **XGBoost**.
 - Resultado geral: **R² médio ≤ 0** para **CP** e **TDN_based_ADF**; **GB/XGB** reduzem RMSE/MAE vs Linear/Naïve, mas não tornam R² positivo.
 - Implicação: espectro puro + média espacial por buffer **não carrega sinal suficiente** para generalizar por data; próximo ciclo exige **Δ controlado** e **clima**.
+2025-10-25T12:58:22+00:00  | exp01 | LODO (paper-like, sem clima) | Δ<=5: N/A (ainda) | TDN_def=ADF | painel atualizado

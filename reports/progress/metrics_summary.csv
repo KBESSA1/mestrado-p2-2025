@@ -1,0 +1,3 @@
+heldout_date,model,r2,rmse,mae,target,source_file,model_raw,model_std
+__mean__,naive-last,-2.31364131800224,2.8068349925532097,2.375702540505631,CP,exp01_metrics_CP_naive.csv,naive-last,Naïve
+__mean__,naive-last,-0.5324151129015978,5.328042627757625,4.470812272399629,TDN,exp01_metrics_TDN_naive.csv,naive-last,Naïve
