@@ -1,3 +1,11 @@
-heldout_date,model,r2,rmse,mae,target,source_file,model_raw,model_std
-__mean__,naive-last,-2.31364131800224,2.8068349925532097,2.375702540505631,CP,exp01_metrics_CP_naive.csv,naive-last,Naïve
-__mean__,naive-last,-0.5324151129015978,5.328042627757625,4.470812272399629,TDN,exp01_metrics_TDN_naive.csv,naive-last,Naïve
+model,r2,rmse,mae,target,source_file,model_raw,model_std
+naive-last,-2.3461085550501,2.738185005231579,2.330374297518333,CP,exp01_metrics_CP_naive.csv,naive-last,Naïve
+linear,-2.704492246996602,2.575972653168532,2.158772941196172,CP,exp01_metrics_CP_linear.csv,linear,Linear
+ridge,-2.626769034704595,2.575772543397716,2.2414308464094286,CP,exp01_metrics_CP_ridge.csv,ridge,Ridge
+gb,-1.0607325144927715,2.317595827945641,1.9590471267633391,CP,exp01_metrics_CP_gb.csv,gb,GB
+xgb,-1.0505590226647217,2.315346151510366,1.977045294028392,CP,exp01_metrics_CP_xgb.csv,xgb,XGB
+naive-last,-0.4501775227133862,5.206238798949116,4.318862277110802,TDN,exp01_metrics_TDN_naive.csv,naive-last,Naïve
+linear,-3.638484290608339,7.068555433043318,5.620376258594797,TDN,exp01_metrics_TDN_linear.csv,linear,Linear
+ridge,-2.1032785917093477,6.114762421259827,5.098973430655675,TDN,exp01_metrics_TDN_ridge.csv,ridge,Ridge
+gb,-0.7340606985836434,5.492947041459681,4.571430442858266,TDN,exp01_metrics_TDN_gb.csv,gb,GB
+xgb,-0.8533552157917134,5.686836257425793,4.7286674595873865,TDN,exp01_metrics_TDN_xgb.csv,xgb,XGB
