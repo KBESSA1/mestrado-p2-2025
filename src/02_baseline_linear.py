@@ -1,79 +1,89 @@
-import argparse, os, pandas as pd, numpy as np
+# -*- coding: utf-8 -*-
+import os
+import argparse
+from pathlib import Path
+import pandas as pd
+import numpy as np
+
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
+
 from utils_lodo import make_lodo_splits, compute_metrics
+from feat_picker import pick_features
 
-def pick_features(df: pd.DataFrame):
-    bands = [f"B{i}" for i in range(1,13)] + ["B8A","B9","B11","B12"]
-    indices = ["NDVI","NDWI","EVI","LAI","DVI","GCI","GEMI","SAVI"]
-    keep = [c for c in df.columns if (c in bands) or (c in indices)]
-    keep = [c for c in keep if c in df.columns and pd.api.types.is_numeric_dtype(df[c])]
-    return keep
-
-def scatter_plot(y_true, y_pred, title, out_png):
-    y_true, y_pred = np.asarray(y_true).ravel(), np.asarray(y_pred).ravel()
-    lo = float(np.nanmin([y_true.min(), y_pred.min()])); hi = float(np.nanmax([y_true.max(), y_pred.max()]))
-    pad = 0.05 * (hi - lo if hi > lo else 1.0); lo -= pad; hi += pad
-    plt.figure(figsize=(5,5))
-    plt.scatter(y_true, y_pred, alpha=0.7, s=18); plt.plot([lo,hi],[lo,hi],'--',linewidth=1)
-    plt.xlabel("y (observado)"); plt.ylabel("ŷ (previsto)"); plt.title(title)
-    plt.xlim(lo,hi); plt.ylim(lo,hi); plt.tight_layout(); plt.savefig(out_png, dpi=200); plt.close()
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", required=True); ap.add_argument("--date-col", required=True)
-    ap.add_argument("--target-col", required=True); ap.add_argument("--out", required=True)
+    ap.add_argument("--csv", required=True)
+    ap.add_argument("--date-col", required=True)
+    ap.add_argument("--target-col", required=True)
+    ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
-    out_csv = args.out
-    out_dir   = os.path.dirname(out_csv) or "."
-    plots_dir = os.path.join(out_dir, "plots")
-    preds_dir = os.path.join(out_dir, "preds")
-    os.makedirs(plots_dir, exist_ok=True); os.makedirs(preds_dir, exist_ok=True)
+    out_csv  = args.out
+    out_dir  = os.path.dirname(out_csv) or "."
+    plots_dir = os.path.join(out_dir, "plots")   # reservado (compat)
+    preds_dir = os.path.join(out_dir, "preds")   # reservado (compat)
+    os.makedirs(plots_dir, exist_ok=True)
+    os.makedirs(preds_dir, exist_ok=True)
 
+    # ---- carregar e validar
     df = pd.read_csv(args.csv)
-    feats = pick_features(df)
-    if args.target_col not in df.columns: raise SystemExit(f"target '{args.target_col}' não existe")
-    if args.date_col  not in df.columns:  raise SystemExit(f"date '{args.date_col}' não existe")
-    if not feats: raise SystemExit("nenhuma feature espectral encontrada")
+    if args.target_col not in df.columns:
+        raise SystemExit(f"target '{args.target_col}' não existe")
+    if args.date_col not in df.columns:
+        raise SystemExit(f"date '{args.date_col}' não existe")
+
+    # ---- features
+    feats = pick_features(df, args.target_col)
+    if not feats:
+        raise SystemExit("nenhuma feature espectral/clima encontrada")
+    # limpar NaNs nas colunas usadas
     df = df.dropna(subset=feats + [args.target_col]).reset_index(drop=True)
 
-    rows, preds_all = [], []
+    # ---- modelo
+    pipe = Pipeline([
+        ("scaler", StandardScaler(with_mean=True, with_std=True)),
+        ("lr", LinearRegression())
+    ])
+
+    rows = []
+    # LODO: Leave-One-Date-Out
     for fold in make_lodo_splits(df, args.date_col):
         dtag = fold.heldout_date.date().isoformat()
+
         Xtr = df.loc[fold.train_idx, feats].values
         ytr = df.loc[fold.train_idx, args.target_col].values
-        Xte = df.loc[fold.test_idx, feats].values
-        yte = df.loc[fold.test_idx, args.target_col].values
+        Xte = df.loc[fold.test_idx,  feats].values
+        yte = df.loc[fold.test_idx,  args.target_col].values
 
-        pipe = Pipeline([("scaler", StandardScaler()), ("lin", LinearRegression())])
         pipe.fit(Xtr, ytr)
         yhat = pipe.predict(Xte)
 
         m = compute_metrics(yte, yhat)
-        rows.append({"fold_date": dtag, "model": "linear", **m})
+        rows.append({
+            "heldout_date": dtag,
+            "model": "linear",
+            "r2": float(m["r2"]),
+            "rmse": float(m["rmse"]),
+            "mae": float(m["mae"])
+        })
 
-        fold_preds_path = os.path.join(preds_dir, f"preds_linear_{args.target_col}_{dtag}.csv")
-        pd.DataFrame({"fold_date": dtag, "y_true": yte, "y_pred": yhat}).to_csv(fold_preds_path, index=False)
+    # ---- salvar CSV com média
+    out_df = pd.DataFrame(rows)
+    if not out_df.empty:
+        mean_row = {
+            "heldout_date": "__mean__",
+            "model": "linear",
+            "r2": float(out_df["r2"].mean()),
+            "rmse": float(out_df["rmse"].mean()),
+            "mae": float(out_df["mae"].mean()),
+        }
+        out_df = pd.concat([out_df, pd.DataFrame([mean_row])], ignore_index=True)
 
-        fold_plot_path = os.path.join(plots_dir, f"scatter_linear_{args.target_col}_{dtag}.png")
-        scatter_plot(yte, yhat, f"LINEAR | {args.target_col} | {dtag}", fold_plot_path)
-
-        preds_all.append(pd.DataFrame({"y_true": yte, "y_pred": yhat}))
-
-    r2m   = float(np.mean([r["r2"]   for r in rows]))
-    rmsem = float(np.mean([r["rmse"] for r in rows]))
-    maem  = float(np.mean([r["mae"]  for r in rows]))
-    rows.append({"fold_date": "__mean__", "model": "linear", "r2": r2m, "rmse": rmsem, "mae": maem})
-    pd.DataFrame(rows).to_csv(out_csv, index=False)
-
-    if preds_all:
-        big = pd.concat(preds_all, ignore_index=True)
-        big.to_csv(os.path.join(preds_dir, f"preds_linear_{args.target_col}_ALL.csv"), index=False)
-        scatter_plot(big["y_true"], big["y_pred"], f"LINEAR | {args.target_col} | TODOS OS FOLDS",
-                     os.path.join(plots_dir, f"scatter_linear_{args.target_col}_ALL.png"))
+    Path(out_csv).parent.mkdir(parents=True, exist_ok=True)
+    out_df.to_csv(out_csv, index=False)
 
     print(f"ok -> {out_csv} | feats={len(feats)} | plots={plots_dir} | preds={preds_dir} | alvo={args.target_col}")
 

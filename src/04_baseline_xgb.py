@@ -1,89 +1,83 @@
-import argparse, os, pandas as pd, numpy as np
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+import sys
+import xgboost as xgb
+import argparse, pandas as pd, numpy as np
+from pathlib import Path
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from sklearn.model_selection import GroupKFold
 from xgboost import XGBRegressor
-import matplotlib.pyplot as plt
-from utils_lodo import make_lodo_splits, compute_metrics
 
-def pick_features(df: pd.DataFrame):
-    bands = [f"B{i}" for i in range(1,13)] + ["B8A","B9","B11","B12"]
-    indices = ["NDVI","NDWI","EVI","LAI","DVI","GCI","GEMI","SAVI"]
-    keep = [c for c in df.columns if (c in bands) or (c in indices)]
-    keep = [c for c in keep if c in df.columns and pd.api.types.is_numeric_dtype(df[c])]
-    return keep
+def pick_features(df, target, date_col):
+    drop = {target, date_col, "Satellite_Images_Dates", "Latitude", "Longitude", "SampleID"}
+    cols = [c for c in df.columns if c not in drop and pd.api.types.is_numeric_dtype(df[c])]
+    return cols
 
-def scatter_plot(y_true, y_pred, title, out_png):
-    y_true, y_pred = np.asarray(y_true).ravel(), np.asarray(y_pred).ravel()
-    lo = float(np.nanmin([y_true.min(), y_pred.min()]))
-    hi = float(np.nanmax([y_true.max(), y_pred.max()]))
-    pad = 0.05 * (hi - lo if hi > lo else 1.0); lo -= pad; hi += pad
-    plt.figure(figsize=(5,5))
-    plt.scatter(y_true, y_pred, alpha=0.7, s=18)
-    plt.plot([lo,hi],[lo,hi],'--',linewidth=1)
-    plt.xlabel("y (observado)"); plt.ylabel("ŷ (previsto)"); plt.title(title)
-    plt.xlim(lo,hi); plt.ylim(lo,hi); plt.tight_layout(); plt.savefig(out_png, dpi=200); plt.close()
+def lodo_eval(df, date_col, feats, target):
+    dates = pd.to_datetime(df[date_col]).dt.date
+    X = df[feats].values
+    y = df[target].values
+    gkf = GroupKFold(n_splits=len(np.unique(dates)))
+    rows = []
+    for (train_idx, test_idx), d in zip(gkf.split(X, y, groups=dates), np.unique(dates)):
+        Xtr, Xte = X[train_idx], X[test_idx]
+        ytr, yte = y[train_idx], y[test_idx]
+        mtr = ~np.isnan(Xtr).any(axis=1) & ~np.isnan(ytr)
+        mte = ~np.isnan(Xte).any(axis=1) & ~np.isnan(yte)
+        Xtr, ytr = Xtr[mtr], ytr[mtr]
+        Xte, yte = Xte[mte], yte[mte]
+        if len(ytr)==0 or len(yte)==0:
+            r2 = rmse = mae = np.nan
+        else:
+            model = xgb.XGBRegressor(
+    n_estimators=args.n_estimators,
+    max_depth=args.max_depth,
+    learning_rate=args.learning_rate,
+    subsample=args.subsample,
+    colsample_bytree=args.colsample_bytree,
+    reg_lambda=args.reg_lambda,
+    reg_alpha=args.reg_alpha,
+    n_jobs=-1,
+    random_state=42,
+    tree_method='hist',
+)
+            model.set_params(**rparams_xgb)
+
+            model.fit(Xtr, ytr)
+            pred = model.predict(Xte)
+            r2 = r2_score(yte, pred)
+            rmse = mean_squared_error(yte, pred, squared=True) ** 0.5
+            mae = mean_absolute_error(yte, pred)
+        rows.append({"heldout_date": str(d), "r2": r2, "rmse": rmse, "mae": mae})
+    return pd.DataFrame(rows)
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", required=True); ap.add_argument("--date-col", required=True)
-    ap.add_argument("--target-col", required=True); ap.add_argument("--out", required=True)
-    args = ap.parse_args()
 
-    out_csv = args.out
-    out_dir   = os.path.dirname(out_csv) or "."
-    plots_dir = os.path.join(out_dir, "plots")
-    preds_dir = os.path.join(out_dir, "preds")
-    os.makedirs(plots_dir, exist_ok=True); os.makedirs(preds_dir, exist_ok=True)
+    args = ap.add_argument("--n_estimators", type=int, default=800)
+
+ap.add_argument("--eta", type=float, default=None)  # alias
+
+# se --eta foi passado, sobrescreve learning_rate
+if ap.get_default("eta") is not None:
+    pass  # placeholder para manter bloco válido
+ap.parse_args()
+if hasattr(args, 'eta') and args.eta is not None:
+    args.learning_rate = args.eta
 
     df = pd.read_csv(args.csv)
-    feats = pick_features(df)
-    if args.target_col not in df.columns: raise SystemExit(f"target '{args.target_col}' não existe")
-    if args.date_col  not in df.columns:  raise SystemExit(f"date '{args.date_col}' não existe")
-    if not feats: raise SystemExit("nenhuma feature espectral encontrada")
-    df = df.dropna(subset=feats + [args.target_col]).reset_index(drop=True)
+    if args.date_col not in df.columns:
+        raise SystemExit(f"coluna de data '{args.date_col}' não existe")
+    if args.target_col not in df.columns:
+        raise SystemExit(f"target '{args.target_col}' não existe")
 
-    rows, preds_all = [], []
-    for fold in make_lodo_splits(df, args.date_col):
-        dtag = fold.heldout_date.date().isoformat()
-        Xtr = df.loc[fold.train_idx, feats].values
-        ytr = df.loc[fold.train_idx, args.target_col].values
-        Xte = df.loc[fold.test_idx,  feats].values
-        yte = df.loc[fold.test_idx,  args.target_col].values
+    feats = pick_features(df, args.target_col, args.date_col)
+    res = lodo_eval(df, args.date_col, feats, args.target_col)
 
-        pipe = Pipeline([
-            ("scaler", StandardScaler()),
-            ("xgb", XGBRegressor(
-                n_estimators=600, max_depth=4, learning_rate=0.05,
-                subsample=0.9, colsample_bytree=0.9,
-                reg_alpha=0.0, reg_lambda=1.0,
-                random_state=42, n_jobs=0, tree_method="hist",
-            ))
-        ])
-        pipe.fit(Xtr, ytr)
-        yhat = pipe.predict(Xte)
-
-        m = compute_metrics(yte, yhat)
-        rows.append({"fold_date": dtag, "model": "xgb", **m})
-
-        pd.DataFrame({"fold_date": dtag, "y_true": yte, "y_pred": yhat}) \
-          .to_csv(os.path.join(preds_dir, f"preds_xgb_{args.target_col}_{dtag}.csv"), index=False)
-        scatter_plot(yte, yhat, f"XGB | {args.target_col} | {dtag}",
-                     os.path.join(plots_dir, f"scatter_xgb_{args.target_col}_{dtag}.png"))
-        preds_all.append(pd.DataFrame({"y_true": yte, "y_pred": yhat}))
-
-    r2m   = float(np.mean([r["r2"]   for r in rows]))
-    rmsem = float(np.mean([r["rmse"] for r in rows]))
-    maem  = float(np.mean([r["mae"]  for r in rows]))
-    rows.append({"fold_date": "__mean__", "model": "xgb", "r2": r2m, "rmse": rmsem, "mae": maem})
-    pd.DataFrame(rows).to_csv(out_csv, index=False)
-
-    if preds_all:
-        big = pd.concat(preds_all, ignore_index=True)
-        big.to_csv(os.path.join(preds_dir, f"preds_xgb_{args.target_col}_ALL.csv"), index=False)
-        scatter_plot(big["y_true"], big["y_pred"], f"XGB | {args.target_col} | TODOS OS FOLDS",
-                     os.path.join(plots_dir, f"scatter_xgb_{args.target_col}_ALL.png"))
-
-    print(f"ok -> {out_csv} | feats={len(feats)} | plots={plots_dir} | preds={preds_dir} | alvo={args.target_col}")
+    mean_row = {"heldout_date": "__mean__", "r2": res["r2"].mean(),
+                "rmse": res["rmse"].mean(), "mae": res["mae"].mean()}
+    out = pd.concat([res, pd.DataFrame([mean_row])], ignore_index=True)
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(args.out, index=False)
+    print(f"ok -> {args.out} | feats={len(feats)} | alvo={args.target_col}")
 
 if __name__ == "__main__":
     main()
