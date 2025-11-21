@@ -1,3 +1,24 @@
+# [kbessa-header]
+# Autor: Rodrigo Kbessa (UFMS) – projeto pastagens tropicais
+# Notas: Script de suporte dentro do projeto UFMS-pastagens. Responsável por alguma etapa de pré-processamento, experimento ou análise.
+# Observação: comentários escritos no espírito de diário de bordo do mestrado.
+
+"""
+Script: 02b_baseline_ridge.py
+Autor: Rodrigo Kbessa (UFMS, 2025)
+
+Descrição rápida:
+  - Regressão Ridge (L2) para CP e TDN em LODO.
+
+Ideia:
+  - Mesma lógica do Linear, mas com um "freio" na multicolinearidade
+    pesada de bandas + índices + clima.
+
+Destaque:
+  - Com seleção de features (FS via XGB), o Ridge vira um baseline
+    bem mais forte do que parece olhando só para a teoria.
+"""
+
 # -*- coding: utf-8 -*-
 import os, argparse
 import pandas as pd

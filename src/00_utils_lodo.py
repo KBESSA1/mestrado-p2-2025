@@ -1,3 +1,8 @@
+# [kbessa-header]
+# Autor: Rodrigo Kbessa (UFMS) – projeto pastagens tropicais
+# Notas: Utilitário de validação Leave-One-Date-Out (LODO). Simula cenário real de prever campanhas futuras nunca vistas.
+# Observação: comentários escritos no espírito de diário de bordo do mestrado.
+
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List

@@ -1,3 +1,26 @@
+# [kbessa-header]
+# Autor: Rodrigo Kbessa (UFMS) – projeto pastagens tropicais
+# Notas: Script de suporte dentro do projeto UFMS-pastagens. Responsável por alguma etapa de pré-processamento, experimento ou análise.
+# Observação: comentários escritos no espírito de diário de bordo do mestrado.
+
+"""
+Script: 02_baseline_linear.py
+Autor: Rodrigo Kbessa (UFMS, 2025)
+
+Descrição rápida:
+  - Regressão Linear simples para CP e TDN em LODO (Leave-One-Date-Out).
+
+Por que existe:
+  - Serve como régua mínima: se o modelo não ganha disso, não merece
+    entrar na conversa da dissertação.
+
+O que faz:
+  - Lê um CSV com as features já montadas (RAW/D5/D7, com ou sem clima).
+  - Remove chaves e alvos do X, aplica z-score só com base no treino.
+  - Roda LODO por Date (cada campanha vira fold de teste).
+  - Salva métricas e predições em /workspace/reports para comparação.
+"""
+
 # -*- coding: utf-8 -*-
 import os
 import argparse

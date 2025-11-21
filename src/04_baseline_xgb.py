@@ -1,3 +1,28 @@
+# [kbessa-header]
+# Autor: Rodrigo Kbessa (UFMS) – projeto pastagens tropicais
+# Notas: Baseline genérico de XGBoost com validação LODO por data. Versão nativa para comparar XGBoost com Gradient Boosting e redes.
+# Observação: comentários escritos no espírito de diário de bordo do mestrado.
+
+"""
+Script: 04_baseline_xgb.py
+Autor: Rodrigo Kbessa (UFMS, 2025)
+
+Descrição rápida:
+  - Roda XGBoost para CP e TDN com validação LODO por data.
+  - Também usei XGB como ferramenta de importância de features (gain).
+
+O que faz:
+  - Lê os mesmos CSVs do pipeline (RAW/D5/D7, clim/noclim).
+  - Monta LODO por Date, treina um modelo XGB por campanha deixada de fora.
+  - Gera métricas OOF globais e salva CSVs em /workspace/reports.
+  - Em alguns modos, exporta importâncias de features para análise de FS.
+
+Nota do Kbessa:
+  - Este script virou meu "tanque de guerra" em TDN.
+  - Foi daqui que saiu a evidência de que FS via XGB ajuda árvores e
+    derruba redes neurais em regime temporal.
+"""
+
 import sys
 import xgboost as xgb
 import argparse, pandas as pd, numpy as np
