@@ -1,0 +1,13 @@
+base,source,target,model,r2,rmse,mae,file
+D5,clim,CP,mlp,0.34643242,1.2956936,1.1112508,/workspace/reports/exp03/exp03_D5_CP_mlp_clim_lodo_FINAL.csv
+D5,clim,TDN_based_ADF,xgbnative,0.235292308044403,3.7067429605464186,3.0258371634075343,/workspace/reports/exp03/exp03_D5_TDN_based_ADF_xgbnative_clim_lodo_FINAL.csv
+D5,noclim,CP,mlp,0.21455821,1.4020964,1.1538572,/workspace/reports/exp03/exp03_D5_CP_mlp_noclim_lodo_FINAL.csv
+D5,noclim,TDN_based_ADF,xgbnative,0.2464019337351721,3.5839108210817234,2.935216638361731,/workspace/reports/exp03/exp03_D5_TDN_based_ADF_xgbnative_noclim_lodo_FINAL.csv
+D7,clim,CP,mlp,0.38509595,1.2656873,1.0494637,/workspace/reports/exp03/exp03_D7_CP_mlp_clim_lodo_FINAL.csv
+D7,clim,TDN_based_ADF,xgbnative,0.3663539469773391,3.29664385941279,2.5935587387405312,/workspace/reports/exp03/exp03_D7_TDN_based_ADF_xgbnative_clim_lodo_FINAL.csv
+D7,noclim,CP,mlp,0.3239049,1.3171862,1.0803882,/workspace/reports/exp03/exp03_D7_CP_mlp_noclim_lodo_FINAL.csv
+D7,noclim,TDN_based_ADF,xgbnative,0.3379017425917904,3.4026971605281564,2.7526902151838133,/workspace/reports/exp03/exp03_D7_TDN_based_ADF_xgbnative_noclim_lodo_FINAL.csv
+RAW,clim,CP,mlp,0.30851442,1.5131696,1.2678133,/workspace/reports/exp03/exp03_RAW_CP_mlp_clim_lodo_FINAL.csv
+RAW,clim,TDN_based_ADF,xgbnative,0.3879509984510851,3.315436423844256,2.573644712145965,/workspace/reports/exp03/exp03_RAW_TDN_based_ADF_xgbnative_clim_lodo_FINAL.csv
+RAW,noclim,CP,mlp,0.2592338,1.5651727,1.265591,/workspace/reports/exp03/exp03_RAW_CP_mlp_noclim_lodo_FINAL.csv
+RAW,noclim,TDN_based_ADF,xgbnative,0.3444519564420901,3.4475272562210453,2.830975761222126,/workspace/reports/exp03/exp03_RAW_TDN_based_ADF_xgbnative_noclim_lodo_FINAL.csv

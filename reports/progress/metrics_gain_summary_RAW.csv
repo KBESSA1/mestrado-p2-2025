@@ -1,0 +1,9 @@
+target,model,dR2,dRMSE,dMAE
+CP,linear,,,
+CP,ridge,,,
+CP,gb,,,
+CP,xgb,,,
+TDN,linear,,,
+TDN,ridge,,,
+TDN,gb,,,
+TDN,xgb,,,

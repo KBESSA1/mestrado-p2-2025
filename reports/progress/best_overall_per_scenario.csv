@@ -1,0 +1,5 @@
+model,variant,r2,rmse,mae,Δr2_vs_base,Δrmse_vs_base,Δmae_vs_base,scenario
+mlp,pre,-6.665,7.5715,6.4691,3.0818,0.4014,0.0472,D7/TDN
+mlp,pre+deriv,-1.606,2.3356,1.9995,1.9387,0.7274,0.5902,RAW/CP
+mlp,pre,-2.2915,6.1272,5.2698,1.9318,1.053,0.6971,RAW/TDN
+mlp,pre+deriv,-1.5414,2.177,1.8474,0.8275,0.1889,0.1139,D7/CP

@@ -1,0 +1,13 @@
+base,source,target,model,r2,rmse,mae,file
+D5,clim,CP,mlp,0.6835980061932703,1.4433974029089878,1.0914083018789476,/workspace/reports/exp03_oof/oof_D5_clim_CP_mlp.csv
+D5,clim,TDN_based_ADF,xgbnative,0.29824717269101064,4.3482131496257885,3.468731114052632,/workspace/reports/exp03_oof/oof_D5_clim_TDN_based_ADF_xgbnative.csv
+D5,noclim,CP,mlp,0.5544353949571619,1.7128591646142914,1.2530808632263157,/workspace/reports/exp03_oof/oof_D5_noclim_CP_mlp.csv
+D5,noclim,TDN_based_ADF,xgbnative,0.33879730431651867,4.220715189488917,3.3573388855263158,/workspace/reports/exp03_oof/oof_D5_noclim_TDN_based_ADF_xgbnative.csv
+D7,clim,CP,mlp,0.5406618939694412,1.6853434372568519,1.1606295432522522,/workspace/reports/exp03_oof/oof_D7_clim_CP_mlp.csv
+D7,clim,TDN_based_ADF,xgbnative,0.42965619095301,3.949750731673798,2.9988326714414417,/workspace/reports/exp03_oof/oof_D7_clim_TDN_based_ADF_xgbnative.csv
+D7,noclim,CP,mlp,0.5819075307799142,1.6078974596378668,1.1632271332792794,/workspace/reports/exp03_oof/oof_D7_noclim_CP_mlp.csv
+D7,noclim,TDN_based_ADF,xgbnative,0.4738412511615363,3.793671486693831,3.022191106936937,/workspace/reports/exp03_oof/oof_D7_noclim_TDN_based_ADF_xgbnative.csv
+RAW,clim,CP,mlp,0.5695673757527051,1.8115291381174323,1.2617988887371796,/workspace/reports/exp03_oof/oof_RAW_clim_CP_mlp.csv
+RAW,clim,TDN_based_ADF,xgbnative,0.4642923968991386,3.9099559261470826,2.932397920801282,/workspace/reports/exp03_oof/oof_RAW_clim_TDN_based_ADF_xgbnative.csv
+RAW,noclim,CP,mlp,0.5445752204634502,1.8633784215441849,1.321096166153846,/workspace/reports/exp03_oof/oof_RAW_noclim_CP_mlp.csv
+RAW,noclim,TDN_based_ADF,xgbnative,0.47080763905338496,3.8861068727000045,3.062946614647436,/workspace/reports/exp03_oof/oof_RAW_noclim_TDN_based_ADF_xgbnative.csv
