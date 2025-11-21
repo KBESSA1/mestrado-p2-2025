@@ -1,7 +1,0 @@
-base,target,model,source,cv,r2,rmse,mae,file
-D5,CP,xgbnative,clim,lodo,0.0824906669494121,1.4405780742813286,1.239695415392295,/workspace/reports/exp02/exp02_D5_CP_xgbnative_clim_lodo.csv
-D5,TDN_based_ADF,xgbnative,noclim,lodo,0.2464019337351721,3.5839108210817234,2.935216638361731,/workspace/reports/exp02/exp02_D5_TDN_based_ADF_xgbnative_noclim_lodo.csv
-D7,CP,xgbnative,clim,lodo,0.1764342301509903,1.3648064394753845,1.1459560087738894,/workspace/reports/exp02/exp02_D7_CP_xgbnative_clim_lodo.csv
-D7,TDN_based_ADF,xgbnative,clim,lodo,0.2771784549199705,3.480854717050311,2.8414824414953848,/workspace/reports/exp02/exp02_D7_TDN_based_ADF_xgbnative_clim_lodo.csv
-RAW,CP,xgbnative,noclim,lodo,0.2351345673717454,1.534104432128412,1.2731842812875311,/workspace/reports/exp02/exp02_RAW_CP_xgbnative_noclim_lodo.csv
-RAW,TDN_based_ADF,xgbnative,noclim,lodo,0.3444519564420901,3.4475272562210453,2.830975761222126,/workspace/reports/exp02/exp02_RAW_TDN_based_ADF_xgbnative_noclim_lodo.csv

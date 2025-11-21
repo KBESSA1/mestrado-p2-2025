@@ -1,7 +1,0 @@
-tag	csv
-RAW_no_climate	/workspace/data/data_processed/Complete_DataSet_raw_noclim.csv
-RAW_with_climate	/workspace/data/data_processed/Complete_DataSet_raw_clim.csv
-D5_no_climate	/workspace/data/data_processed/Complete_DataSet_d5_noclim.csv
-D5_with_climate	/workspace/data/data_processed/Complete_DataSet_d5_clim.csv
-D7_no_climate	/workspace/data/data_processed/Complete_DataSet_d7_noclim.csv
-D7_with_climate	/workspace/data/data_processed/Complete_DataSet_d7_clim.csv

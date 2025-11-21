@@ -1,7 +1,0 @@
-base,variant,target,model,r2,rmse,mae,file
-D5,noclim,CP,gb,-0.34481563264854015,1.7621378688518718,1.5305107010368002,/workspace/reports/exp01_UFMS_D5_noclim_CP_gb.csv
-D5,noclim,TDN_based_ADF,gb,0.039390457344816485,4.00194759430431,3.280713845848958,/workspace/reports/exp01_UFMS_D5_noclim_TDN_based_ADF_gb.csv
-D7,clim,CP,xgb,-0.1960457324616632,1.7442097263666767,1.4749267755653601,/workspace/reports/exp01_UFMS_D7_clim_CP_xgb.csv
-D7,noclim,TDN_based_ADF,xgb,0.17369074096361264,3.744525556685938,3.050105875552133,/workspace/reports/exp01_UFMS_D7_noclim_TDN_based_ADF_xgb.csv
-RAW,clim,CP,mlp,-0.4084102477647622,1.9404435460978262,1.6831177129637191,/workspace/reports/exp01_UFMS_RAW_clim_CP_mlp.csv
-RAW,clim,TDN_based_ADF,gb,0.17910883641839687,3.791716485774579,3.086016911734744,/workspace/reports/exp01_UFMS_RAW_clim_TDN_based_ADF_gb.csv

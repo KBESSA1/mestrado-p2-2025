@@ -1,7 +1,0 @@
-base,target,model,clim,r2,rmse,mae,file
-D5,CP,xgb,1,-0.3282707098732814,1.7925159407674012,1.5587661128449215,/workspace/reports/exp01_hls_D5_CP_xgb_clim.csv
-D5,TDN_based_ADF,xgb,1,-0.0573557529655842,4.134194311569193,3.2907581785578346,/workspace/reports/exp01_hls_D5_TDN_based_ADF_xgb_clim.csv
-D7,CP,xgb,1,-0.1960457324616632,1.7442097263666767,1.47492677556536,/workspace/reports/exp01_hls_D7_CP_xgb_clim.csv
-D7,TDN_based_ADF,xgb,1,0.0304442295591468,3.9782435904212488,3.191505760520282,/workspace/reports/exp01_hls_D7_TDN_based_ADF_xgb_clim.csv
-RAW,CP,xgb,1,-0.2638885353680346,1.9632665991116256,1.6826903757117242,/workspace/reports/exp01_hls_RAW_CP_xgb_clim.csv
-RAW,TDN_based_ADF,gb,1,0.1791088364183969,3.7917164857745775,3.086016911734744,/workspace/reports/exp01_hls_RAW_TDN_based_ADF_gb_clim.csv
