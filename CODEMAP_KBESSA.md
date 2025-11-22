@@ -1,193 +1,317 @@
-# STRUCTURE_LINKS (snapshot UFMS)
+# Mapa de Código do Projeto (vista Kbessa)
 
-Mapa rápido da estrutura do projeto dentro do container (`/workspace`),  
-pensado como “cola” para navegação e como apoio ao RAG.
+Visão organizada do que existe em `src/` dentro do container, **do ponto de vista de uso**  
+(onde mexer para: baseline, LODO, FS, HLS, etc.).
 
----
-
-## 1. Raiz do projeto
-
-- `/workspace`  
-  - Raiz do repositório do mestrado.
-  - Contém:
-    - `src/` → código-fonte dos experimentos (ver `Mapa de Código`).
-    - `data/` → dados brutos, processados e derivados.
-    - `reports/` → métricas, resultados consolidados, artefatos de análise.
-    - `scripts/` → utilitários de manutenção/limpeza.
-    - Arquivos de documentação:  
-      - `README.md`  
-      - `SUMMARY_DISCOVERY.md`  
-      - `UFMS_CHAMPIONS_LODO.md`  
-      - `UFMS_FINAL_REPORT_FS15_LODO.md`  
-      - `CODMAP_KBESSA.md` (mapa de código)  
-      - `STRUCTURE_LINKS.md` (este arquivo)
+> Regra de bolso pra explicar pro Takashi:
+> - Seções 1 e 2 → “como eu rodei os modelos em LODO por cenário”.
+> - Seção 7 → “como eu fiz seleção de atributos”.
+> - Seção 6 → “como nasceram as bandas/índices (HLS/S2)”.
 
 ---
 
-## 2. Dados
+## 1. Baselines oficiais gerais (Linear, Ridge, GB, XGB, MLP)
 
-### 2.1 Diretório principal de dados
+Scripts “genéricos”, que não amarram cenário (D5/D7/clim/noclim) no nome:
 
-- `/workspace/data`
+- `02_baseline_linear.py`  
+  - Regressão Linear básica (sem FS).
+- `02b_baseline_ridge.py`  
+  - Ridge Regression (sem FS).
+- `03_baseline_gb.py`  
+  - Gradient Boosting (sklearn), baseline geral.
+- `04_baseline_xgb.py`  
+  - XGBoost “clássico” (não nativo).
+- `05_baseline_mlp.py`  
+  - Baseline MLP (sklearn/PyTorch, dependendo da fase).
 
-Subpastas principais:
+Uso típico:
 
-- `/workspace/data/data_raw`
-  - Contém o **dataset mestre oficial**:
-    - `Complete_DataSet.csv`  
-      → único arquivo mestre (campo + S2 + clima).  
-      → todos os cenários (RAW/D5/D7, clim/noclim) são derivados **em memória** a partir dele.
-
-- `/workspace/data/data_processed`
-  - Contém datasets de fases anteriores e derivados históricos.
-  - Exemplo (pode variar):
-    - `Complete_Dataset.csv`  
-      → versão processada histórica usada nos primeiros baselines.
-    - `ACTIVE_DATASET.csv` → **link lógico** (ou CSV ativo) apontando para o dataset S2 atual da fase em questão (ex.: `complete_S2_allgeom.csv`).
-    - `_meta/`  
-      → metadados, snapshots, descrições de versões intermediárias (quando existirem).
-
-- `/workspace/data/feature_selected`
-  - CSVs **reduzidos por FS** (FS15, etc.) gerados pelo pipeline XGBoost:
-    - `*_FS15_*.csv`  
-      → usados nos experimentos Ridge_FS, GB_FS, XGB_FS, MLP_FS, KAN_FS, XNet_FS.
-
-- `/workspace/data/feature_sets`
-  - Listas de features selecionadas por cenário:
-    - `*.features.txt`  
-      → nomes de colunas que compõem FS15 (e outros subconjuntos).
-
-> Regra:  
-> - Para contar a história oficial do dataset → falar em `data_raw/Complete_DataSet.csv`.  
-> - Para replays históricos → mencionar `data_processed/Complete_Dataset.csv` e derivados.
+- Servem como **baseline por cenário** (definindo CSV + target + esquema de CV via argumentos).
+- Hoje, os resultados consolidados estão em `UFMS_MASTER_*`, então esses scripts são mais para **replay/pedagógico** e conferência histórica.
 
 ---
 
-## 3. Relatórios e métricas
+## 2. Experimentos LODO por cenário (CP/TDN, D5/D7, clim/noclim, modelo)
 
-### 3.1 Diretório raiz de relatórios
+Scripts `01_*` amarram **CP/TDN × base (D5/D7) × clima on/off × modelo** e já usam LODO correto.
 
-- `/workspace/reports/`
+### 2.1 CP — D5/D7 × clim/noclim × modelos
 
-Subpastas mais importantes:
+- `01_cp_D5_clim_gb.py`
+- `01_cp_D5_clim_kan.py`
+- `01_cp_D5_clim_linear.py`
+- `01_cp_D5_clim_mlp.py`
+- `01_cp_D5_clim_naive.py`
+- `01_cp_D5_clim_ridge.py`
+- `01_cp_D5_clim_xgb.py`
+- `01_cp_D5_clim_xnet.py`
 
-- `/workspace/reports/exp01_*`  
-  - Resultados **individuais** de experimentos (primeiras rodadas, scripts `01_*`, `02_*`, etc.).
+- `01_cp_D5_noclim_gb.py`
+- `01_cp_D5_noclim_kan.py`
+- `01_cp_D5_noclim_linear.py`
+- `01_cp_D5_noclim_lodo.py`   ← helper específico de LODO (não é modelo)
+- `01_cp_D5_noclim_mlp.py`
+- `01_cp_D5_noclim_naive.py`
+- `01_cp_D5_noclim_ridge.py`
+- `01_cp_D5_noclim_xgb.py`
+- `01_cp_D5_noclim_xnet.py`
 
-- `/workspace/reports/finals_cv/`
-  - Resultados finais por cenário/modelo (fase de **CV/tuning por modelo**).
-  - Ex.: `final_D5_CP_gb_full.csv`, `final_RAW_CP_mlp_clim.csv`.
+- `01_cp_D7_clim_gb.py`
+- `01_cp_D7_clim_kan.py`
+- `01_cp_D7_clim_linear.py`
+- `01_cp_D7_clim_mlp.py`
+- `01_cp_D7_clim_naive.py`
+- `01_cp_D7_clim_ridge.py`
+- `01_cp_D7_clim_xgb.py`
+- `01_cp_D7_clim_xnet.py`
 
-- `/workspace/reports/progress/`
-  - **Coração** dos resultados consolidados:
-    - `UFMS_MASTER_metrics_all.csv`  
-      → tabela mestre com **todas** as execuções (5924 linhas).
-    - `UFMS_MASTER_LODO_all.csv`  
-      → subset com **apenas LODO**.
-    - `UFMS_MASTER_KFOLD_all.csv`  
-      → subset com **KFold** (ablação, KAN/XNet/MLP).
-    - `UFMS_MASTER_GKF_all.csv`  
-      → subset com **GroupKFold**.
-    - `UFMS_MASTER_LODO_champions_by_scenario.csv`  
-      → campeões LODO por cenário (Base × Target × Clima × FS).
-    - `UFMS_FINALS_best.csv`  
-      → melhores modelos oficiais por cenário.
-    - `UFMS_TUNED_all.csv`  
-      → rodadas de tuning (GB/XGB etc.).
-    - `UFMS_TUNED_vs_FINALS.csv`  
-      → comparação tuning vs finais.
-    - `UFMS_TAKASHI_LODO_champions_auto.csv`  
-      → campeões LODO (versão “auto” para o resumo Takashi).
-    - `UFMS_TAKASHI_model_stats_auto.csv`  
-      → estatísticas de R² médio/máx. por Modelo × Target × CV.
-    - Relatórios em texto/markdown:
-      - `SUMMARY_DISCOVERY.md`  
-      - `UFMS_CHAMPIONS_LODO.md`  
-      - `UFMS_FINAL_REPORT_FS15_LODO.md`  
-      - Outros arquivos auxiliares de análise.
+- `01_cp_D7_noclim_gb.py`
+- `01_cp_D7_noclim_kan.py`
+- `01_cp_D7_noclim_lodo.py`   ← helper específico de LODO
+- `01_cp_D7_noclim_mlp.py`
+- `01_cp_D7_noclim_naive.py`
+- `01_cp_D7_noclim_ridge.py`
+- `01_cp_D7_noclim_xgb.py`
+- `01_cp_D7_noclim_xnet.py`
 
-- `/workspace/reports/winners/`
-  - Resultados “vencedores” das fases iniciais (exp01/exp02, etc.).  
-  - Mantidos por histórico, mas a leitura principal agora é via `UFMS_MASTER_*`.
+- `01_exp_s2paper_d5_baselines.py`  
+  - Script “legacy” de baseline no estilo do paper original S2 (usado pra validar o pipeline lá atrás).
 
-### 3.2 Archive de relatórios
+### 2.2 TDN_based_ADF — D5/D7 × clim/noclim × modelos
 
-- `/workspace/_reports_latest.tar.gz`  
-  - **Symlink** para o último archive comprimido de relatórios.  
-  - Útil para backup/export rápido de todos os CSVs/MDs de `reports/`.
+- `01_tdn_D5_clim_gb.py`
+- `01_tdn_D5_clim_kan.py`
+- `01_tdn_D5_clim_linear.py`
+- `01_tdn_D5_clim_mlp.py`
+- `01_tdn_D5_clim_naive.py`
+- `01_tdn_D5_clim_ridge.py`
+- `01_tdn_D5_clim_xgb.py`
+- `01_tdn_D5_clim_xnet.py`
 
----
+- `01_tdn_D5_noclim_gb.py`
+- `01_tdn_D5_noclim_kan.py`
+- `01_tdn_D5_noclim_linear.py`
+- `01_tdn_D5_noclim_mlp.py`
+- `01_tdn_D5_noclim_naive.py`
+- `01_tdn_D5_noclim_ridge.py`
+- `01_tdn_D5_noclim_xgb.py`
+- `01_tdn_D5_noclim_xnet.py`
 
-## 4. Scripts úteis (shell / manutenção)
+- `01_tdn_D7_clim_gb.py`
+- `01_tdn_D7_clim_kan.py`
+- `01_tdn_D7_clim_linear.py`
+- `01_tdn_D7_clim_mlp.py`
+- `01_tdn_D7_clim_naive.py`
+- `01_tdn_D7_clim_ridge.py`
+- `01_tdn_D7_clim_xgb.py`
+- `01_tdn_D7_clim_xnet.py`
 
-- `/workspace/scripts/cleanup_reports.sh`  
-  - Script para limpeza/organização de relatórios (arquivos antigos, cache, etc.).
-  - Registrado no `PATH` via `.bashrc`.
+- `01_tdn_D7_noclim_gb.py`
+- `01_tdn_D7_noclim_kan.py`
+- `01_tdn_D7_noclim_linear.py`
+- `01_tdn_D7_noclim_lodo.py`  ← helper específico de LODO
+- `01_tdn_D7_noclim_mlp.py`
+- `01_tdn_D7_noclim_naive.py`
+- `01_tdn_D7_noclim_ridge.py`
+- `01_tdn_D7_noclim_xgb.py`
+- `01_tdn_D7_noclim_xnet.py`
 
-Outros scripts de automação importantes (em `src/`):
-
-- `/workspace/src/make_policy_symlinks.sh`  
-  - Cria symlinks de políticas/configs (legacy/organização).
-- `/workspace/src/run_final_baselines.sh`  
-  - Roda um conjunto final de baselines LODO de forma automatizada.
-
-Na raiz do projeto:
-
-- `/workspace/run_gkf_all.sh`  
-  - Roda todas as ablações com GroupKFold (checagem metodológica).
-
-> Sempre que um novo script de automação for criado, idealmente:
-> - colocá-lo em `/workspace/scripts` ou em `src/`,  
-> - e registrar aqui com uma linha de descrição.
-
----
-
-## 5. Alias & PATH (no container)
-
-Arquivo de configuração do shell:
-
-- `~/.bashrc`
-
-Contém (no momento deste snapshot):
-
-- Alias:
-  - `alias cleanup_reports='cleanup_reports.sh'` (exemplo típico; ajustar para o nome real).
-- PATH:
-  - `export PATH="/workspace/scripts:$PATH"`
-
-E eventualmente outros aliases/exports usados no projeto.
+> **Resumo mental:**  
+> `01_cp_*` → CP  
+> `01_tdn_*` → TDN_based_ADF  
+> Sufixos dizem **base (D5/D7)**, **clima (clim/noclim)** e **modelo (gb/mlp/xgb/kan/xnet/naive/linear/ridge)**.
 
 ---
 
-## 6. Versões e ambiente (snapshot)
+## 3. Funções utilitárias / helpers gerais
 
-Informações detalhadas de ambiente (SO, Python, pacotes, GPU, CUDA, etc.):
-
-- Consultar o **audit** mais recente (ex.: `AUDIT_ENV_*.md` ou seção de ambiente no README/SUMMARY).
-- No momento deste snapshot:
-  - SO: distribuição Linux da imagem NVIDIA DL (container).  
-  - Python: 3.10.x  
-  - GPU: NVIDIA (4070/4090, dependendo da máquina host)  
-  - Principais libs:
-    - `numpy`, `pandas`, `scikit-learn`
-    - `xgboost`
-    - `torch` (PyTorch)
-    - Demais listadas no `requirements.txt` / Dockerfile.
-
-> Ideia: este item não congela versões exatas aqui, só aponta para o documento oficial de ambiente.
+- `utils_lodo.py`  
+  - **Versão oficial** das funções de LODO (group por `Date`, splits, etc.).
+- `00_utils_lodo.py`  
+  - Versão antiga/auxiliar de utilitários de LODO (mantida por histórico).
+- `sitecustomize.py`  
+  - Ajustes globais de ambiente (PATH, prints, etc).
+- `ping.py`  
+  - Script de teste rápido (importar libs, checar ambiente).
 
 ---
 
-## 7. Como usar este arquivo na prática
+## 4. Scripts Python de suporte (análises, dashboards, comparações)
 
-- Para **explicar a estrutura** pro orientador:  
-  → focar nas seções 2 (Dados) e 3 (Relatórios).
+- `_compare_lodo_vs_gkf.py`  
+  - Compara resultados LODO vs GroupKFold (sanidade metodológica).
+- `_eval_groupkfold.py`  
+  - Avaliações focadas em GroupKFold.
 
-- Para **entrar no container e se achar rápido**:  
-  → usar as seções 1 (Raiz), 4 (Scripts) e 5 (Alias & PATH).
+- `compare_climate_gains.py`  
+  - Análises de **ganho com clima** vs **sem clima**.
 
-- Para **futuro RAG / IA**:  
-  → este arquivo serve de índice estável para localizar:
-    - onde está o dataset mestre (`data_raw/Complete_DataSet.csv`);
-    - onde estão as métricas consolidadas (`reports/progress/UFMS_MASTER_*`);
-    - quais scripts automatizam limpezas e rodadas finais.
+- `feat_picker.py`  
+  - Utilitário para selecionar subconjuntos de features (auxiliar de FS).
+- `feature_config.py`  
+  - Configurações de features (listas, grupos, etc).
+- `lit_feature_filter.py`  
+  - Filtro de features guiado por literatura (“lit”).
+
+- `progress_dashboard.py`  
+  - Dashboard textual/plots para acompanhar evolução dos experimentos (lê `UFMS_MASTER_*`).
+
+- `quick_test.py`  
+  - Script de sandbox para testar alguma ideia rápida com o dataset.
+
+- `run_exp01.py`  
+  - Orquestrador da bateria de experimentos “exp01” (primeiras rodadas).
+- `run_with_climate_raw.py`  
+  - Rodadas específicas no cenário RAW com clima.
+
+- `05_baseline_mlp.backup.py`  
+- `05_baseline_mlp.backup.preproc.py`  
+  - Backups históricos da evolução do baseline MLP (não usar como fonte principal agora).
+
+- `__init__.py`  
+  - Marca `src` como pacote Python (importável com `PYTHONPATH=/workspace/src`).
+
+---
+
+## 5. Runners auxiliares de cross-validation / grid search
+
+- `_gb_cv_runner.py`
+- `_hgb_cv_runner.py`
+- `_mlp_cv_runner.py`
+- `_xgb_cv_runner.py`
+- `_xgb_cv_runner_native.py`
+- `_xgb_native_cv_runner.py`
+
+Esses scripts:
+
+- Definem **grids leves** de hiperparâmetros;
+- Rodam **CV sistemático** (geralmente KFold/GroupKFold);
+- Alimentam os CSVs de tuning que depois entraram em  
+  `UFMS_TUNED_all.csv` e `UFMS_TUNED_vs_FINALS.csv`.
+
+> Hoje, `_gb_cv_runner.py` e `_xgb_cv_runner_native.py` são os principais de referência  
+> pra explicar **como** foi feito tuning/FS pro Takashi.
+
+---
+
+## 6. Scripts de HLS / Sentinel / pré-processamento de bandas
+
+Pasta `datasets/` e afins:
+
+- `datasets/make_hls_s2_bands.py`  
+  - Script principal para gerar bandas/índices harmonizados HLS/S2.
+- `datasets/make_hls_s2_bands.backup.py`  
+- `datasets/make_hls_s2_bands.procpatch.backup.py`  
+- `datasets/make_hls_s2_bands.qcpatch.backup.py`  
+  - Versões anteriores/patcheadas (histórico, só olhar se precisar auditar).
+
+Scripts auxiliares de HLS/S2:
+
+- `hls_extract_fill_bands.py`
+- `hls_extract_fill_bands_v2.py`  
+  - Tratamento de bandas faltantes / preenchimento.
+
+- `hls_manifest_s2.py`
+- `hls_manifest_s2_cmr.py`  
+  - Criação/uso de manifest de cenas S2/HLS (listagem por data/área).
+
+- `make_hls_datasets.py`  
+  - Geração de datasets HLS/S2 a partir dos manifests.
+
+---
+
+## 7. Scripts de seleção/importância de features (FS via XGBoost / Ridge)
+
+### 7.1 Ridge + FS por cenário
+
+- `02_cp_D5_clim_ridge_fs.py`
+- `02_cp_D5_noclim_ridge_fs.py`
+- `02_cp_D7_clim_ridge_fs.py`
+- `02_cp_D7_noclim_ridge_fs.py`
+
+- `02_tdn_D5_clim_ridge_fs.py`
+- `02_tdn_D5_noclim_ridge_fs.py`
+- `02_tdn_D7_clim_ridge_fs.py`
+- `02_tdn_D7_noclim_ridge_fs.py`
+
+> Ridge treinado em **datasets já reduzidos por FS15** ou gerando comparações FS vs full.
+
+### 7.2 GB + FS por cenário
+
+- `03_cp_D5_clim_gb_fs.py`
+- `03_cp_D5_noclim_gb_fs.py`
+- `03_cp_D7_clim_gb_fs.py`
+- `03_cp_D7_noclim_gb_fs.py`
+
+- `03_tdn_D5_clim_gb_fs.py`
+- `03_tdn_D5_noclim_gb_fs.py`
+- `03_tdn_D7_clim_gb_fs.py`
+- `03_tdn_D7_noclim_gb_fs.py`
+
+> Idem Ridge, mas para GB; resultados entram na análise FS15.
+
+### 7.3 Importâncias de features e geração de FS15
+
+- `02_feature_importance_xgb_all.py`  
+  - Roda XGBoost em todos cenários e guarda importâncias (ganho) fold a fold.
+- `03_feature_importance_summary.py`  
+  - Agrega importâncias por cenário (média/mediana, frequência em top-K).
+
+- `ufms_fs_ranker.py`  
+  - Gera rankings FS15 estáveis (top-15 features por cenário).
+- `ufms_make_fs_csv.py`  
+  - Cria CSVs reduzidos em `data/feature_selected/` e listas em `data/feature_sets/`.
+
+Esses scripts são a base da política de FS descrita em  
+`UFMS_FINAL_REPORT_FS15_LODO.md` e usada nos modelos FS.
+
+---
+
+## 8. Shell scripts de automação de experimentos
+
+Na raiz de `src/`:
+
+- `make_policy_symlinks.sh`  
+  - Cria symlinks de políticas/arquivos de config (legacy/organização).
+- `run_final_baselines.sh`  
+  - Script para rodar um conjunto final de baselines (LODO) de forma automatizada.
+
+(Ver também na raiz do projeto `/workspace`):
+
+- `run_gkf_all.sh`  
+- `/workspace/scripts/cleanup_reports.sh`
+
+---
+
+## 9. Arquivos auxiliares / backups / não prioritários
+
+- `03_baseline_gb.py.bak`  
+- `04_baseline_xgb.py.bak`  
+  - Backups dos scripts de baseline GB/XGB quando foram mexidos (indent/argparse etc.).
+
+- `lit_prior.yaml`  
+  - Configuração/priors relacionada ao “lit”/paper (mais metadado que código).
+
+- Arquivos `__pycache__/...`  
+  - Apenas caches do Python; podem ser ignorados.
+
+---
+
+## 10. Como usar este mapa (rota mental)
+
+- Quer **reproduzir um resultado LODO**?  
+  → olhar **Seção 2** (scripts `01_*`) + `utils_lodo.py`.
+
+- Quer explicar **baseline clássico** em aula/banca?  
+  → **Seção 1** (02/03/04/05 baselines) + `UFMS_MASTER_LODO_all.csv`.
+
+- Quer mostrar **efeito de clima**?  
+  → Seção 2 (clim vs noclim) + `compare_climate_gains.py`.
+
+- Quer falar de **FS / importâncias de features**?  
+  → **Seção 7** (XGB FS + Ridge/GB FS) + `UFMS_FINAL_REPORT_FS15_LODO.md`.
+
+- Quer discutir **KFold vs LODO / overfitting metodológico**?  
+  → **Seção 5** (runners) + scripts `_compare_lodo_vs_gkf.py`, `_eval_groupkfold.py`  
+    e os CSVs `UFMS_MASTER_KFOLD_all.csv` vs `UFMS_MASTER_LODO_all.csv`.
