@@ -62,6 +62,8 @@
   - `final_*.csv` — resultados finais por cenário/modelo em fases anteriores.
 - `/workspace/reports/progress/`
   - Diretório **principal** de métricas consolidadas e resumos.
+- `/workspace/_reports_latest.tar.gz`
+  - Snapshot compactado dos relatórios mais recentes (arquivo/symlink de conveniência).
 
 ### 3.2 Arquivos “master” de métricas
 
@@ -132,16 +134,18 @@
 
 ### 4.3 Experimentos por cenário (CP / TDN)
 
-- `01_*_cp_*.py`
-  - Scripts principais para **CP** (D5/D7, clim/noclim, LODO).
-- `01_*_tdn_*.py`
-  - Scripts principais para **TDN_based_ADF**.
+- `01_cp_*.py`
+  - Scripts principais para **CP** (D5/D7, clim/noclim, LODO por data).
+  - Exemplos: `01_cp_D5_clim_mlp.py`, `01_cp_D7_noclim_xgb.py`.
+- `01_tdn_*.py`
+  - Scripts principais para **TDN_based_ADF** (D5/D7, clim/noclim, LODO por data).
+  - Exemplos: `01_tdn_D5_clim_gb.py`, `01_tdn_D7_noclim_xnet.py`.
 
 ### 4.4 Redes neurais pesadas
 
-- `01_*_kan*.py`
+- `01_*kan*.py`
   - Experimentos com **KAN** (CP/TDN, KFold/LODO, com/sem FS).
-- `01_*_xnet*.py`
+- `01_*xnet*.py`
   - Experimentos com **XNet** (idem).
 
 ### 4.5 Feature selection via XGBoost
@@ -161,7 +165,11 @@
 
 - `_gb_cv_runner.py`
 - `_xgb_cv_runner.py`
-  - Runners limpos para CV/tuning de GB/XGB (sem mexer nos scripts antigos 03/04).
+- `_xgb_cv_runner_native.py`
+- `_mlp_cv_runner.py`
+- `_hgb_cv_runner.py`
+- `_xgb_native_cv_runner.py`
+  - Runners limpos para CV/tuning de GB/XGB/MLP/HGB (sem mexer nos scripts antigos 03/04).
 
 > Detalhes adicionais de cada script estão em `CODMAP_KBESSA.md`.
 
