@@ -31,7 +31,7 @@ Com o dataset atual, CP está relativamente próximo do limite de previsibilidad
 - KAN, XNet e MLP apresentam desempenho muito bom em K-Fold aleatório (sem respeito à estrutura temporal), o que confirma alta capacidade intrínseca.
 - Em validação LODO por data:
   - O desempenho de redes profundas cai de forma acentuada.
-  - Modelos baseados em árvores (GB, XGB) e modelos lineares (Ridge) se mantêm mais estáveis.
+  - Modelos baseados em árvores (GB/HGB, XGB) e modelos lineares (Ridge) se mantêm mais estáveis.
 - Em cenário real de uso (previsão por data/campanha), os modelos de árvore tendem a ser superiores ou, no mínimo, mais confiáveis.
 
 **Conclusão 2**  
@@ -58,7 +58,7 @@ O clima é um componente importante para melhorar a predição de CP, mas não �
   - Cálculo de importâncias (por ganho) por cenário.
   - Seleção de um conjunto reduzido de aproximadamente 15 atributos por cenário (FS15).
 - Efeitos observados:
-  - GB, XGB e Ridge melhoram de forma clara com FS15 (menor variância e, em muitos casos, melhor R²).
+  - GB/HGB, XGB e Ridge melhoram de forma clara com FS15 (menor variância e, em muitos casos, melhor R²).
   - Para MLP, KAN e XNet, FS15 é neutra ou prejudicial, especialmente em TDN com clima.
 - Interpretação:
   - Modelos de árvore e lineares se beneficiam de um espaço de entrada mais enxuto e estável.
@@ -96,7 +96,7 @@ O limite atual é a densidade temporal e espectral do dataset, não a ausência 
 
 ### 3.2 Avaliação sistemática de múltiplas famílias de modelos
 
-- De Naive e regressões lineares até GB, XGB, MLP, KAN e XNet.
+- De Naive e regressões lineares até GB/HGB, XGB, MLP, KAN e XNet.
 - Cobertura pouco comum em trabalhos de mestrado com dataset agrícola pequeno.
 
 ### 3.3 Demonstração prática de “overfitting metodológico”
@@ -121,10 +121,11 @@ O limite atual é a densidade temporal e espectral do dataset, não a ausência 
 
 ## 4. Tabela geral de métricas (LODO por data)
 
-Esta seção resume, em uma única tabela, as principais métricas de todos os cenários e arquiteturas avaliados sob validação LODO por data, conforme extração atual de `UFMS_ALLMODELS_metrics_LODO.csv`.  
-A tabela abaixo apresenta, para cada combinação de base, alvo e modelo, os valores de RMSE e MAE.
+Esta seção resume, em formato compacto, as métricas de erro (RMSE e MAE) em validação LODO por data para os principais modelos de interesse (HGB/GB, MLP e XGB nativo), nos três cenários de base (RAW, D5, D7) e para os dois alvos (CP e TDN_based_ADF).  
 
-### 4.1 Tabela de RMSE e MAE por cenário e arquitetura
+As métricas de R² (global e por data), bem como resultados de KAN e XNet, permanecem documentadas em arquivos específicos de resultados e ablações.
+
+### 4.1 Tabela de RMSE e MAE por cenário e arquitetura (HGB, MLP, XGB nativo)
 
 <!-- TABELA_METRICAS_INICIO -->
 
@@ -169,7 +170,10 @@ A tabela abaixo apresenta, para cada combinação de base, alvo e modelo, os val
 
 <!-- TABELA_METRICAS_FIM -->
 
-> Nota: nesta extração estão apenas as colunas RMSE e MAE para os modelos hgb (GB/HistGB), mlp e xgbnative nos cenários RAW, D5 e D7, para CP e TDN_based_ADF. As métricas completas (incluindo R² global e por data, e demais modelos) continuam disponíveis em `UFMS_ALLMODELS_metrics_LODO.csv` e nas tabelas específicas de R².
+Observações rápidas a partir dos erros:
+
+- Para **CP**, os menores RMSE/MAE aparecem sistematicamente em modelos de árvore (HGB/XGB nativo), com MLP apresentando erros maiores.
+- Para **TDN_based_ADF**, todos os modelos têm RMSE elevados (≈ 3,5–4,3) em comparação com a escala do problema, e MLP chega a erros muito altos, reforçando a leitura de que TDN é pouco previsível nesse regime.
 
 ---
 
