@@ -5,219 +5,142 @@ Data de referência: nov/2025
 
 ---
 
-## 1. O que este projeto fez (em uma frase)
+## 1. O que foi feito
 
-Usei imagens Sentinel-2 (e derivados) e variáveis climáticas para prever CP e TDN_based_ADF via aprendizado de máquina, com validação correta em regime temporal (LODO por data), avaliando modelos clássicos e profundos (MLP, KAN, XNet), incluindo seleção de atributos via XGBoost e ablações.
+A partir de um único dataset mestre (**Complete_DataSet.csv**), foram construídos cenários de modelagem para previsão de:
 
----
+- **CP**  
+- **TDN_based_ADF**
 
-## 2. Principais descobertas científicas
+com base em:
 
-### 2.1 CP é previsível; TDN não é
+- bandas e índices do **Sentinel-2**;
+- variáveis climáticas agregadas por janela (quando utilizadas).
 
-- CP apresentou estrutura clara em LODO por data, com valores de R² tipicamente na faixa de aproximadamente 0,30 a 0,45 nos melhores modelos.
-- TDN_based_ADF, mesmo com uso de clima e seleção de atributos, permaneceu com R² baixo (por volta de 0,00 a 0,15).
-- Interpretação:
-  - O sinal espectral de Sentinel-2, combinado com clima, é suficiente para capturar parte relevante da variabilidade de CP.
-  - Para TDN, o sinal disponível é fraco; o modelo tem pouca informação para separar amostras com TDN diferentes.
+Os experimentos usam **validação LODO por data** (cada campanha/dia fica inteira em teste em algum fold) e comparam três famílias principais de modelos:
 
-**Conclusão 1**  
-Com o dataset atual, CP está relativamente próximo do limite de previsibilidade via sensoriamento remoto + clima. Já TDN exige novas fontes de informação (solo, manejo, água, dados laboratoriais adicionais) para que se obtenham ganhos significativos.
+- **hgb** (HistGradientBoosting / GB de árvore);
+- **xgbnative** (XGBoost nativo);
+- **mlp** (rede neural simples).
 
----
+Os cenários de base na tabela são:
 
-### 2.2 Modelos profundos não superam árvores em LODO
+- **RAW**  
+- **D5**  
+- **D7**
 
-- KAN, XNet e MLP apresentam desempenho muito bom em K-Fold aleatório (sem respeito à estrutura temporal), o que confirma alta capacidade intrínseca.
-- Em validação LODO por data:
-  - O desempenho de redes profundas cai de forma acentuada.
-  - Modelos baseados em árvores (GB/HGB, XGB) e modelos lineares (Ridge) se mantêm mais estáveis.
-- Em cenário real de uso (previsão por data/campanha), os modelos de árvore tendem a ser superiores ou, no mínimo, mais confiáveis.
+(que representam diferentes restrições/filtragens temporais a partir do mesmo conjunto mestre).
 
-**Conclusão 2**  
-Para este dataset temporal pequeno, redes profundas vencem no cenário embaralhado (K-Fold i.i.d.), mas perdem para modelos de árvore quando a validação respeita o uso real (LODO por data).
+A tabela abaixo resume as métricas de erro (**RMSE** e **MAE**) para todos os cenários em regime **LODO por data**.
 
 ---
 
-### 2.3 Clima melhora CP e pouco afeta TDN
+## 2. Leitura geral da tabela de métricas
 
-- A inclusão de janelas climáticas como [t−3, t] e [t−7, t] adiciona sinal relevante para CP, com ganhos de R² da ordem de até aproximadamente +0,10 em alguns cenários.
-- Para TDN, o impacto do clima é pequeno ou inconsistente; a baixa previsibilidade do alvo domina.
-- Interpretação:
-  - Clima captura variações fisiológicas da planta ligadas à proteína bruta (CP).
-  - Para TDN, a limitação principal parece ser a natureza do alvo e a falta de informações adicionais, não apenas o clima.
+### 2.1 CP (Proteína Bruta)
 
-**Conclusão 3**  
-O clima é um componente importante para melhorar a predição de CP, mas não é suficiente para resolver a baixa previsibilidade de TDN.
+Para **CP**, nos três conjuntos (D5, D7, RAW):
 
----
+- Os modelos **de árvore** (hgb e xgbnative) apresentam **menores RMSE e MAE** em todos os cenários.
+- A **MLP** tem erros consistentemente maiores (RMSE ≈ 2,0–2,1; MAE ≈ 1,7–1,9), indicando pior ajuste em regime LODO.
 
-### 2.4 Seleção de atributos (FS15 via XGBoost) ajuda modelos clássicos, mas não redes profundas
+Comparando bases:
 
-- Foi utilizada uma política de seleção de atributos baseada em XGBoost:
-  - Cálculo de importâncias (por ganho) por cenário.
-  - Seleção de um conjunto reduzido de aproximadamente 15 atributos por cenário (FS15).
-- Efeitos observados:
-  - GB/HGB, XGB e Ridge melhoram de forma clara com FS15 (menor variância e, em muitos casos, melhor R²).
-  - Para MLP, KAN e XNet, FS15 é neutra ou prejudicial, especialmente em TDN com clima.
-- Interpretação:
-  - Modelos de árvore e lineares se beneficiam de um espaço de entrada mais enxuto e estável.
-  - Redes profundas preferem um espaço de entrada mais rico, mesmo em regime de poucos dados, delegando ao próprio modelo a seleção interna de representações.
+- **D7** e **D5** (quando bem configurados) chegam a RMSE ≈ 1,36–1,71 e MAE ≈ 1,14–1,51 para os melhores modelos (normalmente xgbnative e hgb).  
+- Na base **RAW**, os erros sobem ligeiramente (RMSE ≈ 1,53–1,80; MAE ≈ 1,27–1,55).
 
-**Conclusão 4**  
-Modelos estruturados (árvores e Ridge) ganham com seleção de atributos explícita. Redes profundas tendem a ganhar mais com mais dados e menos poda de atributos.
+Em resumo: para CP, **árvores (xgbnative/hgb) são mais precisas que MLP**, e as variações de base (D5/D7/RAW) mudam o erro, mas sem inverter essa hierarquia.
 
 ---
 
-### 2.5 O gargalo científico é o número de amostras por data
+### 2.2 TDN_based_ADF
 
-- O dataset possui cerca de 312 amostras no total, mas poucas amostras por data/campanha.
-- A validação LODO expõe essa limitação:
-  - Cada fold contém poucas amostras em teste, e a variabilidade entre campanhas é alta.
-- Em ablações com K-Fold aleatório, ignorando a estrutura temporal:
-  - KAN e XNet atingem R² elevados (por exemplo, R² da ordem de 0,8 para CP e até cerca de 0,7 para TDN), mostrando que a capacidade do modelo não é o problema.
-- O principal limitante passa a ser:
-  - densidade temporal (mais datas por campanha),
-  - diversidade espectral e espacial,
-  - integração com outras fontes (solo, manejo, laboratório).
+Para **TDN_based_ADF**:
 
-**Conclusão 5**  
-O limite atual é a densidade temporal e espectral do dataset, não a ausência de modelos sofisticados. Isso abre caminho direto para um doutorado focado em mais dados (tempo, espaço, espectro) e integração de fontes.
+- **hgb** e **xgbnative** mantêm RMSE na faixa ≈ 3,4–4,2 e MAE ≈ 2,8–3,4, de forma relativamente estável entre D5, D7 e RAW.
+- A **MLP** apresenta erros **muito maiores**:
+  - D5: RMSE ≈ 13,64–16,04; MAE ≈ 12,07–13,71  
+  - D7: RMSE ≈ 15,02–17,47; MAE ≈ 13,39–14,51  
+  - RAW: RMSE ≈ 11,68–17,07; MAE ≈ 10,47–15,33
 
----
+Isso indica duas coisas:
 
-## 3. Contribuições concretas do trabalho
-
-### 3.1 Padronização de LODO correto para dataset agrícola pequeno
-
-- Validação sem vazamento temporal.
-- Comparação justa entre modelos.
-- Pipeline reproduzível e documentado.
-
-### 3.2 Avaliação sistemática de múltiplas famílias de modelos
-
-- De Naive e regressões lineares até GB/HGB, XGB, MLP, KAN e XNet.
-- Cobertura pouco comum em trabalhos de mestrado com dataset agrícola pequeno.
-
-### 3.3 Demonstração prática de “overfitting metodológico”
-
-- Embaralhar dados (K-Fold i.i.d.) gera impressão de R² muito altos para redes profundas.
-- LODO por data mostra o cenário de uso real, com desempenho bem mais modesto.
-- Resultado relevante para sensoriamento remoto e agronomia: a forma de validação pode distorcer conclusões sobre o “melhor” modelo.
-
-### 3.4 FS15 via XGBoost como política reprodutível
-
-- Critério claro de seleção de atributos.
-- Arquivos de features documentados em `data/feature_sets/*.features.txt`.
-- CSVs de treino compactos em `data/feature_selected/*.csv`, facilitando reuso e compartilhamento.
-
-### 3.5 Pipeline totalmente reproduzível
-
-- Docker, `environment.yml` e `docker-compose.yml` descrevem o ambiente.
-- Scripts organizados em `src/` com nomenclatura consistente.
-- Relatórios e métricas consolidados em `reports/`.
+1. **TDN é um alvo mais difícil** (erros absolutos maiores do que em CP).
+2. A **MLP é instável** para TDN em LODO (erros explodem), enquanto **hgb/xgbnative** continuam relativamente controlados.
 
 ---
 
-## 4. Tabela geral de métricas (LODO por data)
+### 2.3 Comparação geral entre bases (RAW, D5, D7)
 
-Esta seção resume, em formato compacto, as métricas de erro (RMSE e MAE) em validação LODO por data para os principais modelos de interesse (HGB/GB, MLP e XGB nativo), nos três cenários de base (RAW, D5, D7) e para os dois alvos (CP e TDN_based_ADF).  
+- **D5 e D7**:
+  - Para CP, oferecem os menores erros com modelos de árvore (xgbnative/hgb).
+  - Para TDN, mantêm o padrão: árvores estáveis, MLP muito pior.
+- **RAW**:
+  - Em CP, erros um pouco maiores, mas ainda com árvores melhores que MLP.
+  - Em TDN, mesma hierarquia: árvores razoáveis, MLP inconsistente.
 
-As métricas de R² (global e por data), bem como resultados de KAN e XNet, permanecem documentadas em arquivos específicos de resultados e ablações.
+Conclusão geral da tabela:  
+Em regime LODO, **árvores (hgb, xgbnative)** são claramente superiores à **MLP** tanto em CP quanto em TDN. CP apresenta erros menores e, portanto, é mais “amigável” de modelar; TDN é mais difícil, com erros maiores e redes neurais particularmente frágeis nesse alvo.
 
-### 4.1 Tabela de RMSE e MAE por cenário e arquitetura (HGB, MLP, XGB nativo)
+---
+
+## 3. Tabela de métricas (LODO por data)
+
+A tabela abaixo é a saída direta de `reports/progress/UFMS_ALLMODELS_metrics_LODO.csv` para os modelos **hgb**, **mlp** e **xgbnative**, agregando os cenários D5, D7 e RAW para CP e TDN_based_ADF.
+
+### 3.1 RMSE e MAE por Base, Target e Modelo
 
 <!-- TABELA_METRICAS_INICIO -->
 
 | Base | Target | Modelo | RMSE | MAE |
 | --- | --- | --- | --- | --- |
-| D5 | CP | hgb | 1.7076843802476165 | 1.509169113604525 |
-| D5 | CP | hgb | 1.8573575964676663 | 1.6121471912384209 |
-| D5 | CP | mlp | 2.0855283222591114 | 1.826178086766212 |
-| D5 | CP | mlp | 2.0080263420406768 | 1.6712170377076514 |
-| D5 | CP | xgbnative | 1.4405780742813286 | 1.239695415392295 |
-| D5 | CP | xgbnative | 1.5095069452624854 | 1.301528256670904 |
-| D5 | TDN_based_ADF | hgb | 4.213774305147418 | 3.394144441111956 |
-| D5 | TDN_based_ADF | hgb | 4.232977820218472 | 3.4171054348769347 |
-| D5 | TDN_based_ADF | mlp | 13.641937415856042 | 12.069372442597874 |
-| D5 | TDN_based_ADF | mlp | 16.035791449301108 | 13.710463036138938 |
-| D5 | TDN_based_ADF | xgbnative | 3.7067429605464186 | 3.0258371634075343 |
-| D5 | TDN_based_ADF | xgbnative | 3.5839108210817234 | 2.935216638361731 |
-| D7 | CP | hgb | 1.7044349998455677 | 1.452962141760588 |
-| D7 | CP | hgb | 1.6928684977905055 | 1.4311617729581068 |
-| D7 | CP | mlp | 1.9904758656405213 | 1.7432565003526674 |
-| D7 | CP | mlp | 1.8820470190144811 | 1.558792400399006 |
-| D7 | CP | xgbnative | 1.3648064394753845 | 1.1459560087738894 |
-| D7 | CP | xgbnative | 1.4908775358431952 | 1.2443734077710915 |
-| D7 | TDN_based_ADF | hgb | 4.105241059469466 | 3.3808398378777285 |
-| D7 | TDN_based_ADF | hgb | 3.987981165893757 | 3.272959461576538 |
-| D7 | TDN_based_ADF | mlp | 15.017380026336657 | 13.392603659026106 |
-| D7 | TDN_based_ADF | mlp | 17.47027217938148 | 14.509369945451851 |
-| D7 | TDN_based_ADF | xgbnative | 3.480854717050311 | 2.8414824414953848 |
-| D7 | TDN_based_ADF | xgbnative | 3.5089986006918634 | 2.8808439490660525 |
-| RAW | CP | hgb | 1.801987359463876 | 1.5465654460062688 |
-| RAW | CP | hgb | 1.8324260556322451 | 1.5410807357849994 |
-| RAW | CP | mlp | 2.170974045698828 | 1.901270310481974 |
-| RAW | CP | mlp | 2.018073825715295 | 1.7018142598313435 |
-| RAW | CP | xgbnative | 1.5421853259792075 | 1.3094597773727272 |
-| RAW | CP | xgbnative | 1.534104432128412 | 1.2731842812875311 |
-| RAW | TDN_based_ADF | hgb | 4.119794307603398 | 3.420516229970641 |
-| RAW | TDN_based_ADF | hgb | 4.170787387177113 | 3.4669636528623147 |
-| RAW | TDN_based_ADF | mlp | 11.681998553372011 | 10.473945786908818 |
-| RAW | TDN_based_ADF | mlp | 17.06850772631298 | 15.333801223013054 |
-| RAW | TDN_based_ADF | xgbnative | 3.4683987798491493 | 2.8130972372441176 |
-| RAW | TDN_based_ADF | xgbnative | 3.4475272562210453 | 2.830975761222126 |
+| D5 | CP | hgb | 1.708 | 1.509 |
+| D5 | CP | mlp | 2.086 | 1.826 |
+| D5 | CP | xgbnative | 1.441 | 1.240 |
+| D5 | CP | hgb | 1.857 | 1.612 |
+| D5 | CP | mlp | 2.008 | 1.671 |
+| D5 | CP | xgbnative | 1.510 | 1.302 |
+| D5 | TDN_based_ADF | hgb | 4.214 | 3.394 |
+| D5 | TDN_based_ADF | mlp | 13.642 | 12.069 |
+| D5 | TDN_based_ADF | xgbnative | 3.707 | 3.026 |
+| D5 | TDN_based_ADF | hgb | 4.233 | 3.417 |
+| D5 | TDN_based_ADF | mlp | 16.036 | 13.710 |
+| D5 | TDN_based_ADF | xgbnative | 3.584 | 2.935 |
+| D7 | CP | hgb | 1.704 | 1.453 |
+| D7 | CP | mlp | 1.990 | 1.743 |
+| D7 | CP | xgbnative | 1.365 | 1.146 |
+| D7 | CP | hgb | 1.693 | 1.431 |
+| D7 | CP | mlp | 1.882 | 1.559 |
+| D7 | CP | xgbnative | 1.491 | 1.244 |
+| D7 | TDN_based_ADF | hgb | 4.105 | 3.381 |
+| D7 | TDN_based_ADF | mlp | 15.017 | 13.393 |
+| D7 | TDN_based_ADF | xgbnative | 3.481 | 2.841 |
+| D7 | TDN_based_ADF | hgb | 3.988 | 3.273 |
+| D7 | TDN_based_ADF | mlp | 17.470 | 14.509 |
+| D7 | TDN_based_ADF | xgbnative | 3.509 | 2.881 |
+| RAW | CP | hgb | 1.802 | 1.547 |
+| RAW | CP | mlp | 2.171 | 1.901 |
+| RAW | CP | xgbnative | 1.542 | 1.309 |
+| RAW | CP | hgb | 1.832 | 1.541 |
+| RAW | CP | mlp | 2.018 | 1.702 |
+| RAW | CP | xgbnative | 1.534 | 1.273 |
+| RAW | TDN_based_ADF | hgb | 4.120 | 3.421 |
+| RAW | TDN_based_ADF | mlp | 11.682 | 10.474 |
+| RAW | TDN_based_ADF | xgbnative | 3.468 | 2.813 |
+| RAW | TDN_based_ADF | hgb | 4.171 | 3.467 |
+| RAW | TDN_based_ADF | mlp | 17.069 | 15.334 |
+| RAW | TDN_based_ADF | xgbnative | 3.448 | 2.831 |
 
 <!-- TABELA_METRICAS_FIM -->
 
-Observações rápidas a partir dos erros:
-
-- Para **CP**, os menores RMSE/MAE aparecem sistematicamente em modelos de árvore (HGB/XGB nativo), com MLP apresentando erros maiores.
-- Para **TDN_based_ADF**, todos os modelos têm RMSE elevados (≈ 3,5–4,3) em comparação com a escala do problema, e MLP chega a erros muito altos, reforçando a leitura de que TDN é pouco previsível nesse regime.
-
 ---
 
-## 5. Onde estão os resultados no repositório
+## 4. Onde olhar no repositório
 
-- Relatório textual das descobertas principais (LODO):  
-  `reports/progress/UFMS_CHAMPIONS_LODO.md`
-- Melhores modelos por cenário (tabelas consolidadas):  
-  `reports/progress/UFMS_FINALS_best.csv`
-- Matriz completa de métricas por modelo e cenário (LODO):  
+- Métricas completas (incluindo outras famílias de modelos):  
   `reports/progress/UFMS_ALLMODELS_metrics_LODO.csv`
-- Resumo da política de seleção de atributos (FS15):  
-  `reports/progress/UFMS_FS15_summary.md`
-- Ablations (KAN/XNet, K-Fold, etc.):  
-  `reports/ablations/*.csv`
-- Tabelas finais de R² para CP e TDN:  
-  `reports/progress/R2_TABLES_FINAL.md`
+- Análises adicionais (R², clima, FS, KAN/XNet, etc.):  
+  `reports/progress/` e `reports/ablations/`
+- Código dos experimentos:  
+  `src/`
 
----
-
-## 6. Roteiro de leitura sugerido para o orientador
-
-1. Ler este arquivo: `SUMMARY_DISCOVERY.md`.
-2. Ler `reports/progress/UFMS_CHAMPIONS_LODO.md` (interpretação dos campeões em LODO).
-3. Conferir `reports/progress/R2_TABLES_FINAL.md` (tabelas-resumo de R²).
-4. Ver detalhes e variações de modelos e cenários em  
-   `reports/progress/UFMS_ALLMODELS_metrics_LODO.csv`.
-5. Ver a política de FS15 e listas de atributos em  
-   `reports/progress/UFMS_FS15_summary.md` e `data/feature_sets/`.
-6. Opcional: explorar as ablações em `reports/ablations/` para entender o comportamento de KAN/XNet fora do regime LODO.
-
----
-
-## 7. Conclusão geral
-
-Este trabalho traz resultados originais principalmente em:
-
-- Comparar, de forma sistemática, modelos clássicos e profundos sob validação temporal correta (LODO) em um dataset agrícola pequeno.
-- Quantificar os limites de previsibilidade de CP e TDN_based_ADF com sensoriamento remoto Sentinel-2 combinado a clima.
-- Propor e documentar uma política simples e reprodutível de seleção de atributos (FS15 via XGBoost).
-- Evidenciar que o principal gargalo científico atual não é a falta de modelo sofisticado, mas sim a escassez de dados por campanha e a ausência de fontes de informação complementares.
-
-O projeto abre um caminho claro para um futuro doutorado centrado em:
-
-- Aumento de densidade temporal e espectral (mais datas, mais bandas e sensores).
-- Integração de fontes (solo, manejo, água, análises laboratoriais adicionais).
-- Exploração mais profunda de KAN e XNet em regime temporal realista, com maior volume de dados por campanha.
