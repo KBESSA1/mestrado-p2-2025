@@ -122,7 +122,7 @@ Em resumo:
 - **CP**: R² em LODO **~0,30–0,40**, RMSE ≈ 1,25–1,55.  
 - **TDN_based_ADF**: R² em LODO **~0,25–0,39**, RMSE ≈ 3,3–3,7.
 
-Os valores para TDN são surpreendentemente melhores do que os da fase inicial do projeto.  
+Os valores para TDN são melhores do que os da fase inicial do projeto.  
 Ainda assim, os erros absolutos (RMSE ≈ 3,3–3,7) e a sensibilidade a cenário indicam que o modelo está captando **parte** da variabilidade de TDN, mas ainda longe de um “nível operacional confortável”.
 
 ---
@@ -286,7 +286,7 @@ Isso aponta um caminho direto de **continuidade em doutorado**:
 
 ### 3.1 Padronização de LODO correto em dataset agrícola pequeno
 
-- Implementação de utilitários em `utils_lodo.py` e scripts dedicados por cenário (`01_cp_*`, `01_tdn_*`).
+- Implementação de utilitários em `utils_lodo.py` e scripts dedicados por cenário (`01_cp_*`, `01_tdn_*`).  
 - Validação por data/campanha (`Date`) como grupo de LODO, evitando vazamento temporal.
 
 Resultado: **pipeline de validação replicável e sem vazamento**, compatível com a pergunta prática:
@@ -420,7 +420,7 @@ Em termos de modelos:
 
 Por outro lado, os resultados também mostram que:
 
-- O gargalo principal **não é a arquitetura**, mas sim o **volume e a riqueza dos dados** (temporal, espectral e agronômica).  
+- O gargalo principal **não é a arquitetura**, mas sim o **volume e a riqueza dos dados** (temporais, espectrais e agronômicos).  
 - Existe um caminho natural de **continuidade em doutorado**, explorando:
   - maior densidade temporal e mais campanhas,  
   - múltiplos sensores e bandas derivadas,  
@@ -428,4 +428,3 @@ Por outro lado, os resultados também mostram que:
   - e uma exploração mais profunda de KAN/XNet em **regime LODO**, com mais dados por campanha.
 
 Este repositório, com seus arquivos “master” de métricas e scripts de experimentos, documenta essa trajetória de forma que outros pesquisadores possam **replicar, criticar e estender** o trabalho.
-
