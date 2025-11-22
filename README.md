@@ -2,15 +2,15 @@
 
 Este repositório contém o código, dados derivados e relatórios do projeto de mestrado que usa **imagens Sentinel-2 (S2)** e **variáveis climáticas** para prever:
 
-* **CP** (Proteína Bruta)
-* **TDN_based_ADF** (Nutrientes Digestíveis Totais, estimados via ADF)
+- **CP** (Proteína Bruta)
+- **TDN_based_ADF** (Nutrientes Digestíveis Totais, estimados via ADF)
 
 com foco em:
 
-* **Validação temporal correta** (LODO por data / campanha)
-* Comparação entre **modelos clássicos** e **modelos de rede mais pesados** (MLP, KAN, XNet)
-* **Seleção de features** via XGBoost
-* Ablações com/sem clima e com janelas Δ≤5/Δ≤7 dias entre campo e imagem.
+- **Validação temporal correta** (LODO por data / campanha)
+- Comparação entre **modos clássicos** e **modelos de rede mais pesados** (MLP, KAN, XNet)
+- **Seleção de features** via XGBoost
+- Ablações com/sem clima e com janelas Δ≤5/Δ≤7 dias entre campo e imagem.
 
 ---
 
@@ -22,41 +22,35 @@ Usar Sentinel-2 + clima para prever CP e TDN_based_ADF com validação temporal 
 
 ### 1.2 O que já está feito
 
-* Pipeline de dados consolidado em um **arquivo mestre único**: `Complete_DataSet.csv`.
-* Geração em memória dos cenários:
-
-  * **D5** (Δ≤5 dias entre coleta de campo e imagem S2)
-  * **D7** (Δ≤7 dias)
-  * Versões **com clima** e **sem clima**
-* Validação:
-
-  * **LODO por data** (oficial)
-  * **K-Fold** simples e **GroupKFold** (por data) como conferência
-* Modelos rodados em todos os cenários (CP e TDN_based_ADF):
-
-  * Naive (persistência)
-  * Linear
-  * Ridge
-  * Gradient Boosting (GB)
-  * XGBoost (XGB)
-  * MLP
-  * KAN
-  * XNet
-* **Seleção de features** via XGBoost:
-
-  * Importância por ganho em LODO
-  * Medidas de estabilidade por cenário
-  * Conjunto FS15 (top-15 features estáveis)
-* Re-treino de:
-
-  * Ridge, GB, XGB, MLP, KAN e XNet **com FS** (FS15)
-* Consolidação dos resultados em:
-
-  * `reports/progress/UFMS_MASTER_*.csv`
-  * `reports/progress/UFMS_FINALS_best.csv`
-  * `reports/progress/UFMS_CHAMPIONS_LODO.md`
-  * `reports/progress/UFMS_FINAL_REPORT_FS15_LODO.md`
-  * `reports/progress/SUMMARY_DISCOVERY.md`
+- Pipeline de dados consolidado em um **arquivo mestre único**: `data/data_raw/Complete_DataSet.csv`.
+- Geração em memória dos cenários:
+  - **D5** (Δ≤5 dias entre coleta de campo e imagem S2)
+  - **D7** (Δ≤7 dias)
+  - Versões **com clima** e **sem clima**
+- Validação:
+  - **LODO por data** (oficial)
+  - **K-Fold** simples e **GroupKFold** (por data) como conferência
+- Modelos rodados em todos os cenários (CP e TDN_based_ADF):
+  - Naive (persistência)
+  - Linear
+  - Ridge
+  - Gradient Boosting (GB)
+  - XGBoost (XGB)
+  - MLP
+  - KAN
+  - XNet
+- **Seleção de features** via XGBoost:
+  - Importância por ganho em LODO
+  - Medidas de estabilidade por cenário
+  - Conjunto FS15 (top-15 features estáveis)
+- Re-treino de:
+  - Ridge, GB, XGB, MLP, KAN e XNet **com FS** (FS15)
+- Consolidação dos resultados em:
+  - `reports/progress/UFMS_MASTER_*.csv`
+  - `reports/progress/UFMS_FINALS_best.csv`
+  - `reports/progress/UFMS_CHAMPIONS_LODO.md`
+  - `reports/progress/UFMS_FINAL_REPORT_FS15_LODO.md`
+  - `reports/progress/SUMMARY_DISCOVERY.md`
 
 ---
 
@@ -107,12 +101,9 @@ Estrutura lógica (pode variar levemente):
 │
 ├── README.md
 └── RUN_LOG.md                     # Diário de bordo das execuções
----
 ````
-
 3. Dados
 3.1 Arquivo mestre oficial
-
 Caminho: data/data_raw/Complete_DataSet.csv
 
 Este é o arquivo mestre imutável que representa a base UFMS consolidada (campo + Sentinel-2 + clima).
@@ -140,7 +131,6 @@ Ex.: precipitação, temperatura etc., agregadas em janelas temporais
 Regra: este arquivo não é sobrescrito. Ele é a fonte única a partir da qual todos os cenários D5/D7 com/sem clima são gerados em memória nos scripts.
 
 3.2 Dataset processado (histórico)
-
 Caminho: data/data_processed/Complete_Dataset.csv
 
 Versão processada gerada numa fase anterior. Foi tratada como “dataset oficial” nas primeiras rodadas de baseline.
@@ -152,7 +142,6 @@ Um snapshot histórico para reprodutibilidade.
 Ainda pode ser referenciado por scripts mais antigos.
 
 3.3 Geração dos cenários (D5/D7, com/sem clima)
-
 Atualmente, os cenários não são salvos como CSVs separados; eles são gerados em memória a partir do arquivo mestre. Em cada script:
 
 D5: subset de amostras com Δ≤5 dias entre data de campo e data da imagem S2.
@@ -172,7 +161,6 @@ ufms_D7_{clim|noclim}.csv
 Hoje essa lógica está embutida nos scripts (filtro por datas + seleção de colunas).
 
 3.4 Cenário RAW
-
 Em fases exploratórias houve cenários “RAW”, com menos restrições temporais.
 Na análise final, os cenários oficiais são:
 
@@ -186,7 +174,6 @@ Para ambos os alvos: CP e TDN_based_ADF
 
 4. Validação
 4.1 LODO por data (validação oficial)
-
 Estratégia principal:
 
 Cada fold corresponde a uma data/campanha (Date).
@@ -214,7 +201,6 @@ reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv
 reports/progress/UFMS_FINALS_best.csv
 
 4.2 K-Fold e GroupKFold (sanidade)
-
 Além do LODO, foram rodadas validações adicionais:
 
 K-Fold simples por amostra
@@ -237,7 +223,6 @@ reports/progress/UFMS_MASTER_GKF_all.csv
 
 5. Modelos
 5.1 Modelos clássicos
-
 Naive (persistência)
 
 Baseline obrigatório: previsão = último valor conhecido (por data/campanha ou estratégia equivalente).
@@ -261,7 +246,6 @@ Scripts principais:
 04_baseline_xgb.py
 
 5.2 Modelos neurais
-
 MLP
 
 Em fases iniciais: às vezes sklearn.MLPRegressor
@@ -282,7 +266,6 @@ Para KAN e XNet também existem variantes com feature selection (FS), com sufixo
 
 6. Seleção de features (FS) via XGBoost
 6.1 Estratégia de FS
-
 Rodar XGBoost em cada cenário (base × alvo × clima/noclim) com validação LODO por data.
 
 Em cada fold:
@@ -308,7 +291,6 @@ reports/progress/feature_importance_xgb_stability_TDN_based_ADF.csv
 Arquivos com listas das features selecionadas (ex.: UFMS_FS_selected_*.txt)
 
 6.2 Re-treino com FS (FS15)
-
 Depois de definir os conjuntos FS, foram re-treinados, cenário a cenário:
 
 Ridge
@@ -342,7 +324,6 @@ FS é neutra ou pior:
 MLP, KAN, XNet — especialmente em TDN com clima (perda de capacidade de representação em redes mais pesadas).
 
 7. Resultados principais
-
 Artefatos consolidados mais importantes:
 
 reports/progress/UFMS_MASTER_metrics_all.csv
@@ -373,7 +354,6 @@ reports/progress/SUMMARY_DISCOVERY.md
 → Narrativa geral das principais descobertas.
 
 7.1 Resumo científico (alto nível)
-
 CP (Proteína Bruta):
 
 Apresenta sinal previsível com S2 + clima.
@@ -398,7 +378,6 @@ Redes (MLP, KAN, XNet) têm ganhos pontuais, mas não superam consistentemente G
 
 8. Ambiente e execução
 8.1 Ambiente Docker
-
 O projeto foi configurado para rodar em container com ou sem GPU:
 
 Base: imagem NVIDIA de deep learning (ex.: CUDA 12.x)
@@ -426,11 +405,12 @@ Dados: /workspace/data
 Relatórios: /workspace/reports
 
 8.2 Exemplo de execução (genérico)
-
 Exemplo ilustrativo de chamada para MLP (os argumentos exatos podem variar):
 
 Dentro do container em /workspace:
 
+bash
+Copiar código
 export PYTHONPATH=/workspace/src:$PYTHONPATH
 
 python src/05_baseline_mlp.py \
@@ -441,12 +421,9 @@ python src/05_baseline_mlp.py \
   --with-climate \
   --val-scheme LODO \
   --out reports/exp01_D5_CP_mlp_clim_lodo.csv
-
-
 Consulte o cabeçalho de cada script em src/ para ver a assinatura real (nomes de flags e opções disponíveis).
 
 9. Histórico do dataset (nota importante)
-
 Para evitar confusão:
 
 Fase inicial
@@ -466,7 +443,6 @@ Cenários D5/D7 e clim/noclim são derivados em memória a partir do mestre brut
 Na dissertação e documentos finais, esta filosofia atual (arquivo mestre + derivação em memória) é a versão a ser considerada como “oficial”.
 
 10. Diário de bordo (RUN_LOG)
-
 Arquivo: RUN_LOG.md
 
 Usado como diário de bordo operacional, registra:
@@ -482,22 +458,11 @@ Observações rápidas de resultados (R², problemas, bugs)
 Recomendação:
 
 Consultar o RUN_LOG.md em paralelo a este README para reconstruir a linha do tempo das experiências e entender a evolução dos modelos/cenários.
-EOF
+
+makefile
+Copiar código
+::contentReference[oaicite:0]{index=0}
 
 
-Depois disso:
-
-```bash
-cd /workspace
-git status -sb
-git diff README.md
 
 
-Se estiver tudo ok:
-
-git add README.md
-git commit -m "Fix README dataset paths and structure"
-git push origin main
-
-
-Aí o README fica redondo no GitHub, sem mentira de caminho.
