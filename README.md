@@ -108,6 +108,7 @@ Estrutura lógica (pode variar levemente):
 ├── README.md
 └── RUN_LOG.md                     # Diário de bordo das execuções
 ---
+````
 
 ## 3. Dados
 
