@@ -9,7 +9,7 @@ Data de referência: nov/2025
 
 Este projeto usa um **único dataset mestre**:
 
-- `Complete_DataSet.csv`
+- `data/data_raw/Complete_DataSet.csv`
 
 sobre o qual são definidos, em código, todos os cenários de modelagem para previsão de:
 
@@ -23,7 +23,7 @@ a partir de:
 
 Os cenários são definidos por:
 
-- **Base temporal (`base`)**  
+- **Base temporal (`Base`)**  
   - **RAW** – sem filtro de Δdias entre coleta e imagem.  
   - **D5** – Δdias ≤ 5.  
   - **D7** – Δdias ≤ 7.
@@ -45,12 +45,14 @@ Todos os arquivos de métricas dos scripts em `src/` foram consolidados em:
 
 - `reports/progress/UFMS_MASTER_metrics_all.csv` (5924 linhas)
 
-a partir do qual derivam:
+a partir do qual derivam, entre outros:
 
 - `UFMS_MASTER_LODO_all.csv` – todos os resultados LODO.  
 - `UFMS_MASTER_KFOLD_all.csv` – ablações KFold (KAN/XNet/MLP em regime embaralhado).  
 - `UFMS_MASTER_GKF_all.csv` – GroupKFold quando usado.  
-- `UFMS_MASTER_LODO_champions_by_scenario.csv` – **campeões LODO por cenário (Base × Target × Clima × FS)**.
+- `UFMS_MASTER_LODO_champions_by_scenario.csv` – campeões LODO por cenário (Base × Target × Clima × FS).  
+- `UFMS_TAKASHI_LODO_champions_auto.csv` – campeões LODO por cenário (versão auto-gerada).  
+- `UFMS_TAKASHI_model_stats_auto.csv` – estatísticas de R² por modelo/alvo/CV.
 
 O sumário abaixo se baseia **nesses arquivos consolidados**, e não em um único experimento isolado.
 
@@ -58,112 +60,225 @@ O sumário abaixo se baseia **nesses arquivos consolidados**, e não em um únic
 
 ## 2. Principais descobertas científicas
 
-### 2.1 CP é difícil, mas previsível; TDN_based_ADF é muito mais instável
+### 2.1 CP e TDN_based_ADF: o que é previsível em LODO?
 
-A partir dos campeões LODO por cenário (`UFMS_MASTER_LODO_champions_by_scenario.csv`):
+Usando apenas os **campeões em LODO** por cenário, a partir de  
+`UFMS_TAKASHI_LODO_champions_auto.csv`:
 
-- Para **CP**:
-  - Os melhores modelos em LODO (tipicamente **XGBoost/hgb com ou sem FS**) alcançam **R² por data na faixa ≈ 0,30–0,45**, dependendo de base (RAW/D5/D7) e uso de clima.
-  - Erros típicos (RMSE) ficam em torno de **1,0–1,4** unidades, com MAE ≈ **1,0–1,2** para os cenários vencedores.
+- Para **CP**, os melhores cenários em LODO atingem:
 
-- Para **TDN_based_ADF**:
-  - Mesmo nos melhores cenários (árvores bem ajustadas, com/sem FS), **R² em LODO fica baixo**, geralmente na faixa ≈ **0,00–0,15**.
-  - RMSE permanece alto (≈ **3,0–3,7**) com MAE próximo de **3,0**.
+  - **D7, CP, clim, FS, MLP**  
+    - R² ≈ **0,39** (0,385)  
+    - RMSE ≈ **1,27**  
+    - MAE ≈ **1,05**
 
-**Interpretação:**  
-O sinal espectral + clima carrega estrutura suficiente para **CP** atingir um R² moderado em LODO.  
-Para **TDN_based_ADF**, a informação disponível (imagem + clima) é claramente insuficiente: o modelo tem dificuldade em distinguir amostras com TDN diferentes quando a validação respeita datas/campanhas.
+  - **D7, CP, noclim, FS, MLP**  
+    - R² ≈ **0,32** (0,324)  
+    - RMSE ≈ **1,32**  
+    - MAE ≈ **1,08**
 
----
+  - **D5, CP, clim, FS, MLP**  
+    - R² ≈ **0,35** (0,346)  
+    - RMSE ≈ **1,30**  
+    - MAE ≈ **1,11**
 
-### 2.2 Árvores e ensembles dominam em LODO; redes profundas perdem no regime temporal
+  - **RAW, CP, clim, FS, MLP**  
+    - R² ≈ **0,31** (0,309)  
+    - RMSE ≈ **1,51**  
+    - MAE ≈ **1,27**
 
-Comparando todas as famílias em `UFMS_MASTER_LODO_all.csv`:
+  Ou seja, **CP** é moderadamente previsível em LODO, com R² por data tipicamente na faixa  
+  **0,30–0,40**, dependendo de base e uso de clima.
 
-- Modelos baseados em **árvores/ensemble** (**hgb**, **xgb/xgbnative**) são os campeões em quase todos os cenários **LODO** (arquivo `UFMS_MASTER_LODO_champions_by_scenario.csv`).
-- **Linear/Ridge** formam um degrau intermediário: piores que GB/XGB, mas frequentemente melhores que MLP/KAN/XNet em LODO.
-- **Redes neurais (MLP, KAN, XNet)**:
-  - Em **LODO**, raramente aparecem como campeãs: R² por data tende a ser baixo ou até negativo, sobretudo em TDN.
-  - Em vários cenários, **MLP colapsa** (R² muito negativo, RMSE/MAE bem mais altos que GB/XGB).
+- Para **TDN_based_ADF**, os campeões LODO são dominados por **XGBoost com FS**:
 
-Já em **KFold** (`UFMS_MASTER_KFOLD_all.csv`):
+  - **RAW, TDN, clim, FS, xgbnative**  
+    - R² ≈ **0,39** (0,388)  
+    - RMSE ≈ **3,32**  
+    - MAE ≈ **2,57**
 
-- **KAN_full_KFold** e **XNet_full_KFold** atingem R² **muito altos**:
-  - para **CP**, há configurações com R² ≈ **0,9** em KFold, RMSE < 1,0;
-  - para **TDN_based_ADF**, aparecem R² na casa de **0,6–0,7** em KFold.
-- Ou seja, **as redes têm capacidade intrínseca alta**, mas essa capacidade **não se transfere** para o regime LODO.
+  - **D7, TDN, clim, FS, xgbnative**  
+    - R² ≈ **0,37** (0,366)  
+    - RMSE ≈ **3,30**  
+    - MAE ≈ **2,59**
 
-**Conclusão:**  
-A comparação entre `UFMS_MASTER_KFOLD_all.csv` e `UFMS_MASTER_LODO_all.csv` mostra um caso claro de **overfitting metodológico**:  
-- em dados embaralhados (KFold), redes profundas parecem “vencer o problema”;  
-- em LODO, que simula o uso real (campanhas futuras), **árvores (GB/XGB) são mais estáveis e confiáveis**.
+  - **RAW, TDN, noclim, FS, xgbnative**  
+    - R² ≈ **0,34** (0,344)  
+    - RMSE ≈ **3,45**  
+    - MAE ≈ **2,83**
 
----
+  - **D7, TDN, noclim, FS, xgbnative**  
+    - R² ≈ **0,34** (0,338)  
+    - RMSE ≈ **3,40**  
+    - MAE ≈ **2,75**
 
-### 2.3 Efeito de clima: forte em CP, fraco ou ambíguo em TDN
+  - **D5, TDN, clim/noclim, FS, xgbnative**  
+    - R² ≈ **0,24–0,25**  
+    - RMSE ≈ **3,6–3,7**  
+    - MAE ≈ **2,9–3,0**
 
-Da comparação `clim` vs `noclim` em `UFMS_MASTER_LODO_all.csv`:
+Em resumo:
 
-- Para **CP**:
-  - Em várias combinações Base × Modelo, os cenários **com clima** (`Clima = clim`) têm R² maiores e menores RMSE/MAE que os equivalentes **sem clima**.
-  - O ganho é mais claro em D5/D7, onde o alinhamento temporal entre imagem, clima e coleta é mais rígido.
+- **CP**: R² em LODO **~0,30–0,40**, RMSE ≈ 1,25–1,55.  
+- **TDN_based_ADF**: R² em LODO **~0,25–0,39**, RMSE ≈ 3,3–3,7.
 
-- Para **TDN_based_ADF**:
-  - O efeito do clima é **inconsistente**:
-    - Em alguns cenários, clim e noclim empatam dentro da variabilidade.
-    - Em outros, noclim chega a ser ligeiramente melhor (clima acrescenta ruído/shift entre campanhas).
-
-**Conclusão:**  
-O clima captura variações fisiológicas relevantes para **CP**, mas não resolve o problema de TDN.  
-Para TDN, o gargalo parece ser ausência de outras fontes (solo, manejo, água, composição detalhada).
-
----
-
-### 2.4 Seleção de atributos (FS via XGBoost) ajuda modelos estruturados, mas não redes
-
-Os scripts de FS (`02_*_ridge_fs.py`, `03_*_gb_fs.py`, `02_feature_importance_xgb_all.py`, `ufms_fs_ranker.py`, `ufms_make_fs_csv.py`) e os relatórios em `reports/progress` e `reports/ablations` mostram:
-
-- A política **FS15** (top-K estáveis via XGBoost ganho) foi aplicada por cenário para gerar CSVs reduzidos.
-- Em **GB/XGB/Ridge**, usar FS15:
-  - reduz variância entre folds/campanhas;
-  - melhora ou mantém R² em LODO;
-  - simplifica o espaço de entrada.
-
-- Em **MLP, KAN e XNet**:
-  - FS15 é frequentemente **neutra ou prejudicial**, especialmente em TDN com clima;
-  - as redes parecem preferir o espaço de atributos completo para extrair suas próprias representações.
-
-**Conclusão:**  
-- **Modelos estruturados** (árvores + Ridge) **ganham** com FS explícita.  
-- **Redes profundas** preferem **mais dados e menos poda de atributos**, especialmente fora de LODO (KFold).
+Os valores para TDN são surpreendentemente melhores do que os da fase inicial do projeto.  
+Ainda assim, os erros absolutos (RMSE ≈ 3,3–3,7) e a sensibilidade a cenário indicam que o modelo está captando **parte** da variabilidade de TDN, mas ainda longe de um “nível operacional confortável”.
 
 ---
 
-### 2.5 Gargalo científico: número de amostras por data e riqueza de informação
+### 2.2 Quem manda em LODO: árvores vs redes
 
-Mesmo com todos os ajustes (D5/D7, clima, FS, KAN/XNet):
+Pelas estatísticas de `UFMS_TAKASHI_model_stats_auto.csv`:
 
-- O dataset tem **~312 amostras totais**, mas **poucas por data/campanha**.
-- Em **LODO**, isso aparece como:
-  - folds de teste pequenos;
-  - grande variabilidade entre campanhas;
-  - R² modestos mesmo para os melhores modelos (principalmente em TDN).
+- **Target = CP, CV = lodo**  
 
-Já nas ablações **KFold** (`UFMS_MASTER_KFOLD_all.csv`):
+  - `xgbnative`  
+    - R² médio ≈ **0,19**, R² máx. ≈ **0,89** (52 runs)  
+  - `hgb`  
+    - R² médio ≈ **-0,13**, R² máx. ≈ **0,66** (43 runs)  
+  - `mlp`  
+    - R² médio ≈ **-0,30**, R² máx. ≈ **0,73** (56 runs)
 
-- KAN e XNet alcançam R² altos em CP e TDN, confirmando boa capacidade de aproximação.
-- A diferença de desempenho entre KFold e LODO evidencia que **o problema não é “falta de modelo”**, mas sim:
-  - densidade temporal insuficiente;
-  - pouca diversidade espectral/espacial por campanha;
-  - ausência de fontes complementares (solo, manejo, laboratório detalhado).
+- **Target = TDN_based_ADF, CV = lodo**
+
+  - `xgbnative`  
+    - R² médio ≈ **0,31**, R² máx. ≈ **0,47** (51 runs)  
+  - `hgb`  
+    - R² médio ≈ **0,00**, R² máx. ≈ **0,20** (30 runs)  
+  - `mlp`  
+    - R² médio ≈ **-12,29**, R² máx. ≈ **-3,13** (30 runs)
+
+**Leitura:**
+
+- Nas rodadas LODO, os **melhores modelos por cenário** são em geral:
+  - Para **CP**: MLP com FS (em campeões), mas XGBoost com FS também aparece forte.  
+  - Para **TDN**: **XGBoost com FS** domina.
+
+- Em termos de **R² médio por família**, quem se mantém “no azul” em LODO é:
+  - **xgbnative** (árvore/ensemble) – tanto em CP quanto em TDN.  
+  - `hgb` (HistGradientBoosting) fica instável, com R² médio próximo de zero.  
+  - `mlp` em TDN tem desempenho muito ruim em LODO.
+
+Ou seja, **no regime temporal correto (LODO), árvores/ensembles são os mais estáveis**.  
+Redes densas (MLP) conseguem campeonatos em alguns cenários de CP, mas são **muito frágeis em TDN** e, em média, perdem para XGBoost quando se olha o conjunto completo de rodadas.
+
+---
+
+### 2.3 KFold vs LODO: capacidade intrínseca vs cenário real
+
+Pelos mesmos arquivos, a diferença **KFold × LODO** é gritante:
+
+- **Target = CP, CV = kfold**  
+  - `KAN_full_KFold`  
+    - R² médio ≈ **0,84**, R² máx. ≈ **0,94** (6 runs)  
+  - `XNet_full_KFold`  
+    - R² médio ≈ **0,79**, R² máx. ≈ **0,89** (6 runs)
+
+- **Target = TDN_based_ADF, CV = kfold**  
+  - `XNet_full_KFold`  
+    - R² médio ≈ **0,69**, R² máx. ≈ **0,84** (6 runs)  
+  - `KAN_full_KFold`  
+    - R² médio ≈ **0,55**, R² máx. ≈ **0,69** (6 runs)
+
+Comparando com LODO:
+
+- **CP em LODO**:
+  - `xgbnative` → R² médio ≈ **0,19**; campeões por cenário ≈ **0,30–0,39**.  
+  - `mlp` → R² médio ≈ **negativo**, apesar de alguns picos ≈ **0,73**.  
+  - `KAN`/`XNet` não aparecem entre campeões LODO.
+
+- **TDN em LODO**:
+  - `xgbnative` → R² médio ≈ **0,31**, máx. ≈ **0,47**.  
+  - `mlp` → R² médio fortemente negativo (colapso).  
+  - `KAN`/`XNet` só brilham em KFold, não em LODO.
 
 **Conclusão:**  
-O limite atual é o **dataset** (tempo, espaço, espectro e contexto agronômico), não a ausência de modelos sofisticados.  
-Isso abre um caminho direto para um **doutorado** focado em:
 
-- mais datas e campanhas por área;  
-- sensores adicionais e bandas derivadas;  
-- integração com variáveis de solo, manejo, água e análises laboratoriais adicionais.
+- Em **KFold embaralhado**, KAN e XNet “resolvem o problema” (CP e TDN com R² ≫ 0,7).  
+- Em **LODO**, que respeita a estrutura por data/campanha, essa “magia” desaparece, e quem sustenta desempenho razoável são **ensembles de árvores com FS**.
+
+Isso ilustra um caso claro de **overfitting metodológico**:
+
+> “Se eu treino e valido tudo embaralhado, parece que redes profundas resolvem o problema.  
+> Quando respeito a estrutura temporal real (LODO), o cenário muda completamente.”
+
+---
+
+### 2.4 Efeito de clima
+
+Usando os campeões LODO de `UFMS_TAKASHI_LODO_champions_auto.csv`:
+
+- Em **CP**:
+  - Os melhores cenários usam, em geral, **clima + FS + MLP**.  
+  - D7/clim/FS/MLP é o campeão global de CP em LODO (R² ≈ 0,39).  
+  - Cenários equivalentes sem clima (noclim) têm R² um pouco menor, mas ainda razoável.
+
+- Em **TDN_based_ADF**:
+  - Tanto **clim** quanto **noclim** têm campeões próximos (R² ≈ 0,34–0,39).  
+  - O clima melhora alguns cenários, mas **não resolve** o problema de forma dramática; o ganho é menor que em CP.
+
+**Leitura agronômica:**
+
+- Para **CP**, o clima adiciona informação fisiológica relevante (crescimento, estresse, água).  
+- Para **TDN**, o gargalo está mais em **solo, manejo, água, composição de parede celular** etc. – coisas que nem S2 nem clima conseguem capturar bem sozinhos.
+
+---
+
+### 2.5 Seleção de atributos (FS) via XGBoost
+
+Os experimentos de FS estão documentados em:
+
+- `data/feature_sets/*.features.txt`  
+- `data/feature_selected/*.csv`  
+- Relatórios de FS: `UFMS_FINAL_REPORT_FS15_LODO.md`, `UFMS_TUNED_all.csv`, `UFMS_TUNED_vs_FINALS.csv`.
+
+Os resultados convergem para o seguinte padrão:
+
+- **FS15** (top-15 features estáveis por cenário, via ganho do XGBoost em LODO):
+
+  - Para **árvores e Ridge**:
+    - Reduz variância entre folds/campanhas.  
+    - Em muitos cenários, **aumenta R² em LODO**.  
+    - Simplifica o espaço de entrada sem perder desempenho.
+
+  - Para **MLP, KAN, XNet**:
+    - FS costuma ser **neutra ou negativa**, principalmente em **TDN com clima**.  
+    - As redes parecem preferir o espaço de atributos completo para aprender suas próprias combinações.
+
+Em termos práticos:
+
+- A FS via XGBoost é **uma arma muito boa para modelos estruturados** (ensembles, Ridge).  
+- Para redes, a FS deve ser usada com cuidado, e possivelmente substituída por regularização / arquitetura ou deixada para um cenário com mais dados.
+
+---
+
+### 2.6 Gargalo científico: dados por data vs arquitetura de modelo
+
+Mesmo com:
+
+- múltiplas bases (RAW/D5/D7),  
+- clima on/off,  
+- FS via XGBoost,  
+- redes sofisticadas (KAN/XNet),
+
+os limites observados em LODO apontam fortemente para:
+
+- **poucas amostras por data/campanha**;  
+- grande variabilidade entre campanhas;  
+- falta de fontes adicionais (solo, manejo, água, análises detalhadas).
+
+A comparação **KFold vs LODO** mostra que:
+
+- **Modelos têm capacidade de sobra** (KAN/XNet com R² > 0,8 em KFold);  
+- O que falta é **densidade e diversidade de dados no eixo tempo/campanha**, além de variáveis agronômicas adicionais.
+
+Isso aponta um caminho direto de **continuidade em doutorado**:
+
+- Mais campanhas por área (densidade temporal).  
+- Integração de múltiplos sensores (S2, HLS, SAR, hiperespectral).  
+- Variáveis de manejo, solo, água, etc.  
+- Exploração de redes (KAN/XNet) **no regime temporal correto** (LODO) com um dataset mais rico.
 
 ---
 
@@ -171,157 +286,120 @@ Isso abre um caminho direto para um **doutorado** focado em:
 
 ### 3.1 Padronização de LODO correto em dataset agrícola pequeno
 
-- Implementação de funções utilitárias em `00_utils_lodo.py` / `utils_lodo.py`.
-- Scripts dedicados por cenário (`01_cp_*`, `01_tdn_*`) que:
-  - definem grupos por data/campanha;
-  - evitam vazamento temporal;
-  - salvam métricas e predições fold a fold.
+- Implementação de utilitários em `utils_lodo.py` e scripts dedicados por cenário (`01_cp_*`, `01_tdn_*`).
+- Validação por data/campanha (`Date`) como grupo de LODO, evitando vazamento temporal.
 
-Resultado: **validação replicável e sem vazamento**, adequada à pergunta “consigo prever uma nova campanha?”.
+Resultado: **pipeline de validação replicável e sem vazamento**, compatível com a pergunta prática:
+
+> “Se eu treinar até hoje, consigo prever a próxima campanha?”
 
 ---
 
 ### 3.2 Varredura sistemática de famílias de modelos
 
-Foram testadas, em múltiplos cenários RAW/D5/D7 × clim/noclim × CP/TDN:
+Cobriu-se, de forma organizada, o espaço:
 
-- Baselines simples: naive, linear, ridge.
-- Árvores / ensembles: hgb, xgb/xgbnative.
-- Redes: mlp, KAN, XNet.
+- Baselines: naive, linear, ridge.  
+- Árvores/ensembles: hgb, xgb/xgbnative.  
+- Redes: mlp, KAN, XNet (com e sem FS).  
 
-Poucos trabalhos de mestrado com dataset agrícola tão pequeno:
+Poucos trabalhos de mestrado em sensoriamento remoto agrícola, com dataset tão pequeno, documentam de forma tão sistemática:
 
-- cobrem esse espectro de modelos;
-- documentam de forma sistemática os **limites em LODO**;
-- contrapõem resultados “bonitos” em KFold com a realidade temporal.
-
----
-
-### 3.3 Demonstração prática de overfitting metodológico
-
-Comparando:
-
-- `UFMS_MASTER_KFOLD_all.csv` (KAN/XNet/MLP em KFold), com  
-- `UFMS_MASTER_LODO_all.csv` (todos os modelos em LODO),
-
-fica evidente que:
-
-- R² altíssimos em KFold para KAN/XNet **não se sustentam** quando o dado é particionado por data;
-- a escolha da validação muda completamente a narrativa sobre “qual modelo é melhor”.
-
-Este trabalho traz um exemplo concreto de **overfitting de metodologia** em sensoriamento remoto agrícola:  
-“otimizar modelo em KFold e reportar como se fosse cenário de uso real” produz conclusões enganosas.
+- o desempenho em **LODO** por cenário;  
+- a diferença radical entre LODO e KFold;  
+- o comportamento conjunto de modelos clássicos e redes modernas.
 
 ---
 
-### 3.4 Política de seleção de atributos reprodutível (FS via XGBoost)
+### 3.3 Demonstração quantitativa de overfitting metodológico
 
-- Importâncias por cenário calculadas com `02_feature_importance_xgb_all.py` + `03_feature_importance_summary.py`.
-- Rankings e conjuntos selecionados documentados em:
-  - `data/feature_sets/*.features.txt`
-  - `data/feature_selected/*.csv`
-- Experimentos de FS acoplados a Ridge e GB em scripts dedicados (`02_*_ridge_fs.py`, `03_*_gb_fs.py`).
+Este projeto fornece um **exemplo numérico concreto** de como a escolha da validação muda a narrativa:
 
-Isso garante que qualquer pessoa consiga:
+- Em **KFold**:
+  - KAN/XNet têm R² médio **> 0,8** em CP e **> 0,55** em TDN.  
 
-1. Reproduzir os conjuntos FS15.  
-2. Refazer os testes em outros modelos.  
-3. Expandir a política (doutorado, outros sensores, outros alvos).
+- Em **LODO**:
+  - Quem sustenta desempenho razoável são **árvores/ensembles com FS** (xgbnative), com R² médio ≈ 0,19 (CP) e ≈ 0,31 (TDN).  
+  - KAN/XNet desaparecem dos campeonatos em LODO.
+
+Isso permite discutir com clareza, em aula ou banca:
+
+> “Se eu tivesse ficado só no KFold, eu diria que redes resolvem tudo.  
+> Mas em LODO, que simula uso real, a história muda: árvores com FS são os modelos mais robustos.”
+
+---
+
+### 3.4 Política de seleção de atributos reprodutível
+
+A política FS via XGBoost:
+
+1. Calcula importâncias por ganho em LODO por cenário.  
+2. Agrega por estabilidade (média/mediana + frequência em top-K).  
+3. Define conjuntos FS15 por cenário.  
+4. Gera CSVs reduzidos (`data/feature_selected/`) e listas (`data/feature_sets/`).  
+5. Re-treina modelos com/sem FS, comparando em LODO.
+
+Esse pipeline é **reaproveitável**:
+
+- em outros alvos (ex.: FDN, FDA, minerais);  
+- em outros sensores;  
+- em trabalhos futuros (doutorado).
 
 ---
 
 ### 3.5 Pipeline reprodutível de ponta a ponta
 
-- Ambiente descrito com Docker + configs de Python/Torch/XGBoost.
-- Código organizado em `src/` por função (baselines, LODO, FS, ablações, pré-processamento Sentinel/HLS).
-- Resultados agregados em arquivos “master” dentro de `reports/progress/`.
+- Ambiente Docker padronizado (CUDA, Python 3.10, PyTorch, XGBoost).  
+- Código organizado em `src/` por função (baselines, LODO, FS, HLS/Sentinel, ablações).  
+- Métricas consolidadas em arquivos “master” (`UFMS_MASTER_*.csv` e `UFMS_TAKASHI_*.csv`).
 
-O repositório permite **replay completo** das rodadas principais, além de novas combinações de cenários.
+Qualquer pessoa com acesso ao repositório consegue:
 
----
-
-## 4. Panorama de métricas (LODO e KFold)
-
-As métricas não são replicadas integralmente neste arquivo; a fonte de verdade são os CSVs consolidados.
-
-### 4.1 LODO – matriz completa
-
-Matriz com **todas** as combinações rodadas em LODO:
-
-- `reports/progress/UFMS_MASTER_LODO_all.csv`
-
-Contém, por linha:
-
-- Base, Target, Modelo, Clima, FS, CV_type = LODO;  
-- R2, RMSE, MAE;  
-- caminho do arquivo de origem.
-
-### 4.2 LODO – recorte tabular (D5/D7/RAW × CP/TDN × hgb/mlp/xgbnative, com/sem clima)
-
-A tabela abaixo é um recorte explícito dos resultados **LODO** para os modelos **hgb**, **mlp** e **xgbnative** em **D5, D7 e RAW**, com e sem clima, para **CP** e **TDN_based_ADF**. Os valores foram extraídos diretamente de `UFMS_ALLMODELS_metrics_LODO.csv` (rodada exp02) e são coerentes com a consolidação do master.
-
-<!-- TABELA_METRICAS_INICIO -->
-
-| Base | Target | Modelo | Clima | FS | CV | R2 | RMSE | MAE | Arquivo |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| D5 | CP | hgb | clim | desconhecido | lodo | -0.304 | 1.708 | 1.509 | /workspace/reports/exp02/exp02_D5_CP_hgb_clim_lodo.csv |
-| D5 | CP | mlp | clim | desconhecido | lodo | -2.995 | 2.086 | 1.826 | /workspace/reports/exp02/exp02_D5_CP_mlp_clim_lodo.csv |
-| D5 | CP | xgbnative | clim | desconhecido | lodo | 0.082 | 1.441 | 1.240 | /workspace/reports/exp02/exp02_D5_CP_xgbnative_clim_lodo.csv |
-| D5 | CP | hgb | noclim | desconhecido | lodo | -0.552 | 1.857 | 1.612 | /workspace/reports/exp02/exp02_D5_CP_hgb_noclim_lodo.csv |
-| D5 | CP | mlp | noclim | desconhecido | lodo | -0.793 | 2.008 | 1.671 | /workspace/reports/exp02/exp02_D5_CP_mlp_noclim_lodo.csv |
-| D5 | CP | xgbnative | noclim | desconhecido | lodo | -0.010 | 1.510 | 1.302 | /workspace/reports/exp02/exp02_D5_CP_xgbnative_noclim_lodo.csv |
-| D5 | TDN_based_ADF | hgb | clim | desconhecido | lodo | -0.078 | 4.214 | 3.394 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_hgb_clim_lodo.csv |
-| D5 | TDN_based_ADF | mlp | clim | desconhecido | lodo | -13.999 | 13.642 | 12.069 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_mlp_clim_lodo.csv |
-| D5 | TDN_based_ADF | xgbnative | clim | desconhecido | lodo | 0.235 | 3.707 | 3.026 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_xgbnative_clim_lodo.csv |
-| D5 | TDN_based_ADF | hgb | noclim | desconhecido | lodo | -0.112 | 4.233 | 3.417 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_hgb_noclim_lodo.csv |
-| D5 | TDN_based_ADF | mlp | noclim | desconhecido | lodo | -18.160 | 16.036 | 13.710 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_mlp_noclim_lodo.csv |
-| D5 | TDN_based_ADF | xgbnative | noclim | desconhecido | lodo | 0.246 | 3.584 | 2.935 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_xgbnative_noclim_lodo.csv |
-| D7 | CP | hgb | clim | desconhecido | lodo | -0.310 | 1.704 | 1.453 | /workspace/reports/exp02/exp02_D7_CP_hgb_clim_lodo.csv |
-| D7 | CP | mlp | clim | desconhecido | lodo | -3.494 | 1.990 | 1.743 | /workspace/reports/exp02/exp02_D7_CP_mlp_clim_lodo.csv |
-| D7 | CP | xgbnative | clim | desconhecido | lodo | 0.176 | 1.365 | 1.146 | /workspace/reports/exp02/exp02_D7_CP_xgbnative_clim_lodo.csv |
-| D7 | CP | hgb | noclim | desconhecido | lodo | -0.257 | 1.693 | 1.431 | /workspace/reports/exp02/exp02_D7_CP_hgb_noclim_lodo.csv |
-| D7 | CP | mlp | noclim | desconhecido | lodo | -0.532 | 1.882 | 1.559 | /workspace/reports/exp02/exp02_D7_CP_mlp_noclim_lodo.csv |
-| D7 | CP | xgbnative | noclim | desconhecido | lodo | 0.037 | 1.491 | 1.244 | /workspace/reports/exp02/exp02_D7_CP_xgbnative_noclim_lodo.csv |
-| D7 | TDN_based_ADF | hgb | clim | desconhecido | lodo | 0.007 | 4.105 | 3.381 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_hgb_clim_lodo.csv |
-| D7 | TDN_based_ADF | mlp | clim | desconhecido | lodo | -18.901 | 15.017 | 13.393 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_mlp_clim_lodo.csv |
-| D7 | TDN_based_ADF | xgbnative | clim | desconhecido | lodo | 0.277 | 3.481 | 2.841 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_xgbnative_clim_lodo.csv |
-| D7 | TDN_based_ADF | hgb | noclim | desconhecido | lodo | 0.052 | 3.988 | 3.273 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_hgb_noclim_lodo.csv |
-| D7 | TDN_based_ADF | mlp | noclim | desconhecido | lodo | -23.160 | 17.470 | 14.509 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_mlp_noclim_lodo.csv |
-| D7 | TDN_based_ADF | xgbnative | noclim | desconhecido | lodo | 0.300 | 3.509 | 2.881 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_xgbnative_noclim_lodo.csv |
-| RAW | CP | hgb | clim | desconhecido | lodo | -0.064 | 1.802 | 1.547 | /workspace/reports/exp02/exp02_RAW_CP_hgb_clim_lodo.csv |
-| RAW | CP | mlp | clim | desconhecido | lodo | -1.699 | 2.171 | 1.901 | /workspace/reports/exp02/exp02_RAW_CP_mlp_clim_lodo.csv |
-| RAW | CP | xgbnative | clim | desconhecido | lodo | 0.221 | 1.542 | 1.309 | /workspace/reports/exp02/exp02_RAW_CP_xgbnative_clim_lodo.csv |
-| RAW | CP | hgb | noclim | desconhecido | lodo | -0.127 | 1.832 | 1.541 | /workspace/reports/exp02/exp02_RAW_CP_hgb_noclim_lodo.csv |
-| RAW | CP | mlp | noclim | desconhecido | lodo | -0.644 | 2.018 | 1.702 | /workspace/reports/exp02/exp02_RAW_CP_mlp_noclim_lodo.csv |
-| RAW | CP | xgbnative | noclim | desconhecido | lodo | 0.235 | 1.534 | 1.273 | /workspace/reports/exp02/exp02_RAW_CP_xgbnative_noclim_lodo.csv |
-| RAW | TDN_based_ADF | hgb | clim | desconhecido | lodo | 0.018 | 4.120 | 3.421 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_hgb_clim_lodo.csv |
-| RAW | TDN_based_ADF | mlp | clim | desconhecido | lodo | -8.506 | 11.682 | 10.474 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_mlp_clim_lodo.csv |
-| RAW | TDN_based_ADF | xgbnative | clim | desconhecido | lodo | 0.329 | 3.468 | 2.813 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_xgbnative_clim_lodo.csv |
-| RAW | TDN_based_ADF | hgb | noclim | desconhecido | lodo | 0.007 | 4.171 | 3.467 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_hgb_noclim_lodo.csv |
-| RAW | TDN_based_ADF | mlp | noclim | desconhecido | lodo | -22.669 | 17.069 | 15.334 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_mlp_noclim_lodo.csv |
-| RAW | TDN_based_ADF | xgbnative | noclim | desconhecido | lodo | 0.344 | 3.448 | 2.831 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_xgbnative_noclim_lodo.csv |
-
-<!-- TABELA_METRICAS_FIM -->
-
-> Nota: esta tabela mostra um subconjunto específico (exp02) com hgb, mlp e xgbnative em D5/D7/RAW, com e sem clima, para CP e TDN_based_ADF. Os resultados finais de outras famílias (Naive, Linear, Ridge, KAN, XNet, FS on/off) e demais rodadas consolidadas estão em `UFMS_MASTER_LODO_all.csv` e em `UFMS_MASTER_LODO_champions_by_scenario.csv`.
+- refazer os experimentos principais;  
+- adicionar novos cenários;  
+- reusar os artefatos de FS e validação.
 
 ---
 
-## 5. Guia de leitura para o orientador
+## 4. Panorama de métricas (onde olhar no repositório)
 
-Sugestão de roteiro:
+As métricas detalhadas não são replicadas integralmente aqui. Os arquivos-chave são:
+
+- **LODO (validação oficial)**  
+  - `reports/progress/UFMS_MASTER_LODO_all.csv`  
+  - `reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv`  
+  - `reports/progress/UFMS_TAKASHI_LODO_champions_auto.csv`
+
+- **KFold / GroupKFold (ablações)**  
+  - `reports/progress/UFMS_MASTER_KFOLD_all.csv`  
+  - `reports/progress/UFMS_MASTER_GKF_all.csv`  
+  - Rodadas específicas de KAN/XNet em `reports/ablations/`.
+
+- **Estatísticas de modelos**  
+  - `reports/progress/UFMS_TAKASHI_model_stats_auto.csv`  
+    (R² médio / máximo por Modelo × Target × CV)
+
+- **FS e comparações FS vs full**  
+  - `reports/progress/UFMS_FINAL_REPORT_FS15_LODO.md`  
+  - `reports/progress/UFMS_TUNED_all.csv`  
+  - `reports/progress/UFMS_TUNED_vs_FINALS.csv`
+
+---
+
+## 5. Guia rápido de leitura para o orientador
+
+Sugestão de roteiro para leitura do repositório:
 
 1. Ler este arquivo: `SUMMARY_DISCOVERY.md`  
-   → visão geral do que foi feito e dos resultados.
-2. Ver **campeões em LODO** em:  
-   `reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv`
-3. Conferir a **matriz completa LODO** (todos os modelos/cenários):  
-   `reports/progress/UFMS_MASTER_LODO_all.csv`
-4. Explorar os **R² organizados** (tabelas mais amigáveis):  
-   `reports/progress/R2_TABLES_FINAL.md`
+   → visão geral do que foi feito e dos principais números.
+2. Ver os **campeões em LODO** por cenário:  
+   `UFMS_TAKASHI_LODO_champions_auto.csv`
+3. Comparar com a **matriz completa LODO**:  
+   `UFMS_MASTER_LODO_all.csv`
+4. Explorar **R² médio por modelo/alvo/CV**:  
+   `UFMS_TAKASHI_model_stats_auto.csv`
 5. Ver **KFold vs LODO** para KAN/XNet:  
-   `reports/progress/UFMS_MASTER_KFOLD_all.csv`  
-   e os CSVs específicos de ablação em `reports/ablations/`.
+   `UFMS_MASTER_KFOLD_all.csv` e arquivos de ablações em `reports/ablations/`.
 6. Examinar a política de FS e os conjuntos de atributos:  
    `data/feature_sets/` e `data/feature_selected/`.
 
@@ -331,22 +409,23 @@ Sugestão de roteiro:
 
 Este trabalho mostra, de forma quantitativa e reprodutível, que:
 
-- **CP** é moderadamente previsível em LODO com Sentinel-2 + clima, enquanto  
-- **TDN_based_ADF** apresenta baixa previsibilidade com as fontes atuais.
+- **CP** é **moderadamente previsível** em LODO com Sentinel-2 + clima, com R² ≈ 0,30–0,40 nos melhores cenários.  
+- **TDN_based_ADF** apresenta **previsibilidade limitada**, com R² ≈ 0,25–0,39 e erros absolutos ainda altos, mesmo com clima e FS.
 
 Em termos de modelos:
 
-- **Árvores/ensembles (GB/XGBoost)** são os mais robustos em LODO,  
-- **Redes profundas (MLP, KAN, XNet)** brilham apenas sob validação embaralhada (KFold),  
-- e a diferença LODO vs KFold ilustra claramente o risco de **overfitting metodológico** em estudos de sensoriamento remoto agrícola.
+- **Árvores/ensembles (XGBoost com FS)** são os modelos **mais robustos em LODO**.  
+- **Redes profundas (MLP, KAN, XNet)** atingem R² muito altos em KFold, mas **não transferem esse desempenho** para o regime temporal correto.  
+- A diferença **KFold vs LODO** é um exemplo claro de **overfitting metodológico** em sensoriamento remoto agrícola.
 
-Por outro lado, os experimentos também mostram que:
+Por outro lado, os resultados também mostram que:
 
-- o gargalo principal não é a arquitetura, mas sim o **volume e a riqueza dos dados** (temporal, espectral e agronômica);  
-- há um caminho natural de **continuidade em doutorado** explorando:
-  - maior densidade temporal,  
-  - múltiplos sensores e bandas,  
-  - variáveis de manejo, solo e laboratório mais completas,  
-  - e uma exploração mais profunda de KAN/XNet em regime temporal realista, com maior volume de dados por campanha.
+- O gargalo principal **não é a arquitetura**, mas sim o **volume e a riqueza dos dados** (temporal, espectral e agronômica).  
+- Existe um caminho natural de **continuidade em doutorado**, explorando:
+  - maior densidade temporal e mais campanhas,  
+  - múltiplos sensores e bandas derivadas,  
+  - variáveis de manejo, solo e água,  
+  - e uma exploração mais profunda de KAN/XNet em **regime LODO**, com mais dados por campanha.
 
-Este repositório, com seus arquivos “master” de métricas e scripts de experimentos, documenta essa trajetória de forma que outros pesquisadores possam replicar, criticar e estender o trabalho.
+Este repositório, com seus arquivos “master” de métricas e scripts de experimentos, documenta essa trajetória de forma que outros pesquisadores possam **replicar, criticar e estender** o trabalho.
+
