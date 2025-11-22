@@ -29,3 +29,9 @@ Este repositório espelha o estado real do container Docker em `/workspace` na d
 4. Seleção de features via XGBoost (FS15) e re-treino de GB, XGB, Ridge, MLP, KAN e XNet.
 5. Consolidação dos resultados em `reports/progress/UFMS_FINALS_best.csv` e resumos em `UFMS_CHAMPIONS_LODO.md` e `UFMS_FINAL_REPORT_FS15_LODO.md`.
 
+
+---
+
+## Leitura rápida para o orientador
+
+Para a síntese das descobertas principais, veja o arquivo [`SUMMARY_DISCOVERY.md`](SUMMARY_DISCOVERY.md).
