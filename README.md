@@ -1,6 +1,3 @@
-Copia **tudo** de dentro desse bloco e cola no README do GitHub:
-
-````markdown
 # Projeto Mestrado UFMS — Predição de CP e TDN com Sentinel-2 + Clima
 
 Este repositório contém o código, dados derivados e relatórios do projeto de mestrado que usa **imagens Sentinel-2 (S2)** e **variáveis climáticas** para prever:
