@@ -28,13 +28,13 @@ Scripts “genéricos”, que não amarram cenário (D5/D7/clim/noclim) no nome:
 Uso típico:
 
 - Servem como **baseline por cenário** (definindo CSV + target + esquema de CV via argumentos).
-- Hoje, os resultados consolidados estão em `UFMS_MASTER_*`, então esses scripts são mais para **replay/pedagógico** e conferência histórica.
+- Hoje, os resultados consolidados estão em `UFMS_MASTER_*`, então esses scripts são mais para **replay/pedagógico** e **conferência histórica** (não são mais a “fonte da verdade” das métricas).
 
 ---
 
 ## 2. Experimentos LODO por cenário (CP/TDN, D5/D7, clim/noclim, modelo)
 
-Scripts `01_*` amarram **CP/TDN × base (D5/D7) × clima on/off × modelo** e já usam LODO correto.
+Scripts `01_*` amarram **CP/TDN × base (D5/D7) × clima on/off × modelo** e já usam **LODO correto por data/campanha**.
 
 ### 2.1 CP — D5/D7 × clim/noclim × modelos
 
@@ -131,7 +131,7 @@ Scripts `01_*` amarram **CP/TDN × base (D5/D7) × clima on/off × modelo** e j�
 - `00_utils_lodo.py`  
   - Versão antiga/auxiliar de utilitários de LODO (mantida por histórico).
 - `sitecustomize.py`  
-  - Ajustes globais de ambiente (PATH, prints, etc).
+  - Ajustes globais de ambiente (PATH, prints, etc.).
 - `ping.py`  
   - Script de teste rápido (importar libs, checar ambiente).
 
@@ -150,7 +150,7 @@ Scripts `01_*` amarram **CP/TDN × base (D5/D7) × clima on/off × modelo** e j�
 - `feat_picker.py`  
   - Utilitário para selecionar subconjuntos de features (auxiliar de FS).
 - `feature_config.py`  
-  - Configurações de features (listas, grupos, etc).
+  - Configurações de features (listas, grupos, etc.).
 - `lit_feature_filter.py`  
   - Filtro de features guiado por literatura (“lit”).
 
