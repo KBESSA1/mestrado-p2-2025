@@ -1,0 +1,15 @@
+B9
+Longwave_Rad_AVG
+RAD_SOL
+TEMP_MIN
+Radiative_Dif_AVG
+Radiative_Direct_AVG
+PPFD
+Longitude
+B6
+Latitude
+RAIN
+TDN_based_ADF
+B5
+B8A
+GEMI

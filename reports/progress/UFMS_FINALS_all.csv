@@ -1,0 +1,13 @@
+base,target,model,source,r2,rmse,mae,file
+D5,CP,gb,full,-0.34481563264854026,1.762137868851872,1.5305107010368002,/workspace/reports/finals_cv/final_D5_CP_gb_full.csv
+D5,CP,xgb,full,-0.3127616718792417,1.7644835643944796,1.5195257918989744,/workspace/reports/finals_cv/final_D5_CP_xgb_full.csv
+D5,TDN_based_ADF,gb,full,0.039390457344816485,4.00194759430431,3.2807138458489584,/workspace/reports/finals_cv/final_D5_TDN_based_ADF_gb_full.csv
+D5,TDN_based_ADF,xgb,full,0.03308116722143933,4.00694688198933,3.290376530448309,/workspace/reports/finals_cv/final_D5_TDN_based_ADF_xgb_full.csv
+D7,CP,xgb,clim,-0.19604573246166324,1.7442097263666763,1.4749267755653601,/workspace/reports/finals_cv/final_D7_CP_xgb_clim.csv
+D7,CP,gb,full,-0.2772595660667571,1.8020989256673716,1.5030915195997316,/workspace/reports/finals_cv/final_D7_CP_gb_full.csv
+D7,TDN_based_ADF,xgb,full,0.17369074096361264,3.744525556685938,3.0501058755521324,/workspace/reports/finals_cv/final_D7_TDN_based_ADF_xgb_full.csv
+D7,TDN_based_ADF,gb,full,0.08301435319287012,3.962996016760793,3.268233006999519,/workspace/reports/finals_cv/final_D7_TDN_based_ADF_gb_full.csv
+RAW,CP,mlp,clim,-0.4084102477647623,1.9404435460978262,1.6831177129637191,/workspace/reports/finals_cv/final_RAW_CP_mlp_clim.csv
+RAW,CP,xgb,clim,-0.2638885353680347,1.963266599111626,1.6826903757117244,/workspace/reports/finals_cv/final_RAW_CP_xgb_clim.csv
+RAW,TDN_based_ADF,gb,clim,0.17910883641839692,3.791716485774579,3.086016911734744,/workspace/reports/finals_cv/final_RAW_TDN_based_ADF_gb_clim.csv
+RAW,TDN_based_ADF,xgb,full,0.13060260977860574,3.9138119347591513,3.1509424421893146,/workspace/reports/finals_cv/final_RAW_TDN_based_ADF_xgb_full.csv

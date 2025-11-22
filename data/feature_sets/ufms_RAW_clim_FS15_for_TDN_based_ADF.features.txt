@@ -1,0 +1,15 @@
+TEMP_MIN
+RAD_SOL
+TEMP_MAX
+PRES_ATM
+Radiative_Dif_AVG
+CP
+WIND_SPD
+HUM_REL
+Latitude
+Longitude
+B1
+TP_SFC_AVG
+B8
+GEMI
+EVAPOT

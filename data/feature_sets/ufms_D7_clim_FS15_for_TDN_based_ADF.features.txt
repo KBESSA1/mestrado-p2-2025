@@ -1,0 +1,15 @@
+Radiative_Dif_AVG
+RAD_SOL
+TEMP_MAX
+PRES_ATM
+TEMP_MIN
+Radiative_Direct_AVG
+TP_SFC_AVG
+EVAPOT
+GEMI
+B1
+Longitude
+CP
+LAI
+Latitude
+HUM_REL

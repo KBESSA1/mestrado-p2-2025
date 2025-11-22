@@ -1,0 +1,15 @@
+B6
+CP
+B1
+B12
+B8
+NDWI
+GEMI
+B8A
+B9
+Delta_days
+DVI
+Longitude
+B11
+GCI
+B5

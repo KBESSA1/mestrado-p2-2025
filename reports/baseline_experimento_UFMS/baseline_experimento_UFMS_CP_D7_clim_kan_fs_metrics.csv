@@ -1,0 +1,2 @@
+scenario,target,model,n_samples,n_dates,r2_oof,rmse_oof,mae_oof,features_count,features_json,clim_features_count
+CP_D7_clim,CP,KAN_FS_pykan,222,15,-1.825575584891244,4.1799938345283145,2.6281300453943435,25,"[""Animals"", ""DM"", ""Biomass"", ""ADF"", ""TDN_based_NDF"", ""TDN_based_ADF"", ""DOY"", ""GEMI"", ""DVI"", ""B6"", ""B9"", ""RAD_SOL"", ""Radiative_Dif_AVG"", ""Radiative_Direct_AVG"", ""Longwave_Rad_AVG"", ""TP_SFC_AVG"", ""PRES_ATM"", ""EVAPOT"", ""WIND_SPD"", ""Wind_Dir"", ""HUM_REL"", ""PPFD"", ""TEMP_MAX"", ""TEMP_MIN"", ""RAIN""]",14

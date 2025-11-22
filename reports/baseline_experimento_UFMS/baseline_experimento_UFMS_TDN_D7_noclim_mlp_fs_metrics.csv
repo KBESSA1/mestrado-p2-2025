@@ -1,0 +1,2 @@
+scenario,target,model,n_samples,n_dates,r2_oof,rmse_oof,mae_oof,features_count,features_json,clim_features_count
+TDN_D7_noclim,TDN_based_ADF,MLP_FS_sklearn,222,15,-2.4295796713119397,9.68549386720384,7.275029811571277,10,"[""Animals"", ""DM"", ""Biomass"", ""NDF"", ""B1"", ""B6"", ""B8"", ""B11"", ""B12"", ""GCI""]",0

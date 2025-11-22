@@ -1,0 +1,15 @@
+B9
+B6
+B5
+SampleID
+Longitude
+Latitude
+TDN_based_ADF
+B7
+GEMI
+B8A
+B3
+B1
+EVI
+B11
+B4

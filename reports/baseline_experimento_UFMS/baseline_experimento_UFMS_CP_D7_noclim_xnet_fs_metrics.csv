@@ -1,0 +1,2 @@
+scenario,target,model,n_samples,n_dates,r2_oof,rmse_oof,mae_oof,features_count,features_json,clim_features_count
+CP_D7_noclim,CP,XNET_FS_cauchy,222,15,0.1784160722465462,2.2539700725297704,1.3242912523381345,11,"[""Animals"", ""DM"", ""Biomass"", ""ADF"", ""TDN_based_NDF"", ""TDN_based_ADF"", ""DOY"", ""GEMI"", ""DVI"", ""B6"", ""B9""]",0

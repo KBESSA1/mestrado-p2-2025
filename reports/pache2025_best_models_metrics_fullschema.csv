@@ -1,0 +1,7 @@
+target,R2_best,RMSE_best,MAE_best,MSE_best,satellite_collection,algorithm
+BIO,0.93,,,,Landsat-8/1E ToA,Random Forest (RF)
+DM,0.86,,,,Landsat-9/2E Raw,Voting Regressor (VO)
+NDF,0.94,,,,Planet/RGBN,Decision Tree (DT)
+ADF,0.87,,,,Landsat-8/1A SR,Voting Regressor (VO)
+CP,0.91,,,,Landsat-9/2A,Decision Tree (DT)
+TDN,0.92,,,,Planet/RGBN,Decision Tree (DT)

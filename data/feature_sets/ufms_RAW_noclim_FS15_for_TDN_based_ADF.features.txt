@@ -1,0 +1,15 @@
+CP
+B12
+GEMI
+B6
+Longitude
+B1
+B8A
+B5
+EVI
+Latitude
+NDWI
+B8
+SampleID
+LAI
+B4

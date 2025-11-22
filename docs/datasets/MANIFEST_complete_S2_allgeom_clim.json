@@ -1,0 +1,69 @@
+{
+  "base_window_days": 10,
+  "views": [
+    "D5",
+    "D7",
+    "D10"
+  ],
+  "geometries": {
+    "2DAP5x5": {
+      "patch_px": 5,
+      "res_m": 10
+    },
+    "BUF30m": {
+      "radius_m": 30
+    }
+  },
+  "bands": [
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "B8A",
+    "B9",
+    "B10",
+    "B11",
+    "B12"
+  ],
+  "stats": [
+    "MED",
+    "IQR"
+  ],
+  "qc_rules": {
+    "min_valid_ratio_per_band": 0.7,
+    "drop_row_if_nan_bands_gt": 0.3
+  },
+  "climate": {
+    "columns": [
+      "precip_sum_d5/d7/d10",
+      "tavg_mean_d5/d7/d10",
+      "tmax_mean_d5/d7/d10",
+      "tmin_mean_d5/d7/d10",
+      "rh_mean_d5/d7/d10",
+      "rainy_days_d5/d7/d10",
+      "insolation_h_d5/d7/d10"
+    ],
+    "source": "Table 3 - Weather_Data.csv"
+  },
+  "metadata": [
+    "n_scenes_used",
+    "win_days_used",
+    "min_abs_delta_day",
+    "tile_id",
+    "crs",
+    "processing_baseline",
+    "sun_zenith",
+    "sun_azimuth",
+    "cloud_cover_scene",
+    "source_s2"
+  ],
+  "keys": [
+    "Sample",
+    "Sub_Sample",
+    "Date_std"
+  ]
+}
