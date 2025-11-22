@@ -58,7 +58,7 @@ Usar Sentinel-2 + clima para prever CP e TDN_based_ADF com validação temporal 
 
 Estrutura lógica (pode variar levemente):
 
-```text
+```
 /workspace
 ├── src/                         # Código-fonte de experimentos e utilitários
 │   ├── 01_*_cp_*.py             # Experimentos principais CP (D5, D7, clim/noclim)
