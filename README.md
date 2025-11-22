@@ -64,10 +64,11 @@ Usar Sentinel-2 + clima para prever CP e TDN_based_ADF com validação temporal 
 
 Estrutura lógica (pode variar levemente):
 
+```text
 /workspace
 ├── src/                         # Código-fonte de experimentos e utilitários
-│   ├── 01_**cp**.py             # Experimentos principais CP (D5, D7, clim/noclim)
-│   ├── 01_**tdn**.py            # Experimentos principais TDN_based_ADF
+│   ├── 01_*_cp_*.py             # Experimentos principais CP (D5, D7, clim/noclim)
+│   ├── 01_*_tdn_*.py            # Experimentos principais TDN_based_ADF
 │   ├── 02_baseline_linear.py
 │   ├── 02b_baseline_ridge.py
 │   ├── 03_baseline_gb.py
@@ -75,10 +76,10 @@ Estrutura lógica (pode variar levemente):
 │   ├── 05_baseline_mlp.py
 │   ├── 01_*_kan*.py             # Scripts KAN e KAN_FS
 │   ├── 01_*_xnet*.py            # Scripts XNet e XNet_FS
-│   ├── *gb_cv_runner.py         # Runners de CV/tuning (GB)
-│   ├── *xgb_cv_runner.py        # Runners de CV/tuning (XGB)
+│   ├── _gb_cv_runner.py         # Runners de CV/tuning (GB)
+│   ├── _xgb_cv_runner.py        # Runners de CV/tuning (XGB)
 │   ├── utils_lodo.py            # Utilitários para LODO por data
-│   ├── feature_importance**     # Scripts de FS via XGBoost
+│   ├── feature_importance_*     # Scripts de FS via XGBoost
 │   └── ...                      # Outros utilitários e scripts de apoio
 │
 ├── data/
@@ -88,7 +89,7 @@ Estrutura lógica (pode variar levemente):
 │       └── Complete_Dataset.csv     # Versão processada (histórica)
 │
 ├── reports/
-│   ├── exp01**.csv                  # Resultados individuais de experimentos
+│   ├── exp01_*.csv                  # Resultados individuais de experimentos
 │   ├── finals_cv/
 │   │   └── final_*.csv              # Resultados finais por cenário/modelo
 │   └── progress/
@@ -106,7 +107,6 @@ Estrutura lógica (pode variar levemente):
 │
 ├── README.md
 └── RUN_LOG.md                     # Diário de bordo das execuções
-
 ---
 
 ## 3. Dados
