@@ -110,327 +110,394 @@ Estrutura lógica (pode variar levemente):
 ---
 ````
 
-## 3. Dados
+3. Dados
+3.1 Arquivo mestre oficial
 
-### 3.1 Arquivo mestre oficial
+Caminho: data/data_raw/Complete_DataSet.csv
 
-* **Caminho:** `data_raw/Complete_DataSet.csv`
-
-Este é o **arquivo mestre imutável** que representa a base UFMS consolidada (campo + Sentinel-2 + clima).
+Este é o arquivo mestre imutável que representa a base UFMS consolidada (campo + Sentinel-2 + clima).
 
 Principais colunas:
 
-* `Date` — data/campanha (chave para LODO e GroupKFold)
-* Targets:
+Date — data/campanha (chave para LODO e GroupKFold)
 
-  * `CP`
-  * `TDN_based_ADF`
-* Bandas/índices Sentinel-2:
+Targets:
 
-  * Médias espaciais por buffer / geometria
-  * ~52 bandas/índices em algumas versões (S2/HLS)
-* Variáveis climáticas (quando disponíveis):
+CP
 
-  * Ex.: precipitação, temperatura etc., agregadas em janelas temporais
+TDN_based_ADF
 
-> **Regra:** este arquivo **não é sobrescrito**. Ele é a **fonte única** a partir da qual todos os cenários D5/D7 com/sem clima são gerados **em memória** nos scripts.
+Bandas/índices Sentinel-2:
 
-### 3.2 Dataset processado (histórico)
+Médias espaciais por buffer / geometria
 
-* **Caminho:** `data_processed/Complete_Dataset.csv`
+~52 bandas/índices em algumas versões (S2/HLS)
+
+Variáveis climáticas (quando disponíveis):
+
+Ex.: precipitação, temperatura etc., agregadas em janelas temporais
+
+Regra: este arquivo não é sobrescrito. Ele é a fonte única a partir da qual todos os cenários D5/D7 com/sem clima são gerados em memória nos scripts.
+
+3.2 Dataset processado (histórico)
+
+Caminho: data/data_processed/Complete_Dataset.csv
 
 Versão processada gerada numa fase anterior. Foi tratada como “dataset oficial” nas primeiras rodadas de baseline.
 
 Hoje é:
 
-* Um **snapshot histórico** para reprodutibilidade.
-* Ainda pode ser referenciado por scripts mais antigos.
+Um snapshot histórico para reprodutibilidade.
 
-### 3.3 Geração dos cenários (D5/D7, com/sem clima)
+Ainda pode ser referenciado por scripts mais antigos.
 
-Atualmente, os cenários **não** são salvidos como CSVs separados; eles são gerados em memória a partir do arquivo mestre. Em cada script:
+3.3 Geração dos cenários (D5/D7, com/sem clima)
 
-* **D5**: subset de amostras com Δ≤5 dias entre data de campo e data da imagem S2.
-* **D7**: subset de amostras com Δ≤7 dias.
-* **com clima (clim)**: mantém todas as features climáticas.
-* **sem clima (noclim)**: remove colunas de clima, usando apenas S2 e variáveis auxiliares não climáticas.
+Atualmente, os cenários não são salvos como CSVs separados; eles são gerados em memória a partir do arquivo mestre. Em cada script:
+
+D5: subset de amostras com Δ≤5 dias entre data de campo e data da imagem S2.
+
+D7: subset de amostras com Δ≤7 dias.
+
+com clima (clim): mantém todas as features climáticas.
+
+sem clima (noclim): remove colunas de clima, usando apenas S2 e variáveis auxiliares não climáticas.
 
 Historicamente foram usados arquivos como:
 
-* `ufms_D5_{clim|noclim}.csv`
-* `ufms_D7_{clim|noclim}.csv`
+ufms_D5_{clim|noclim}.csv
+
+ufms_D7_{clim|noclim}.csv
 
 Hoje essa lógica está embutida nos scripts (filtro por datas + seleção de colunas).
 
-### 3.4 Cenário RAW
+3.4 Cenário RAW
 
 Em fases exploratórias houve cenários “RAW”, com menos restrições temporais.
-Na análise final, os cenários **oficiais** são:
+Na análise final, os cenários oficiais são:
 
-* **D5** e **D7**, cada um com:
+D5 e D7, cada um com:
 
-  * Versão com clima
-  * Versão sem clima
-  * Para ambos os alvos: CP e TDN_based_ADF
+Versão com clima
 
----
+Versão sem clima
 
-## 4. Validação
+Para ambos os alvos: CP e TDN_based_ADF
 
-### 4.1 LODO por data (validação oficial)
+4. Validação
+4.1 LODO por data (validação oficial)
 
 Estratégia principal:
 
-* Cada **fold** corresponde a uma **data/campanha** (`Date`).
-* Para cada fold:
+Cada fold corresponde a uma data/campanha (Date).
 
-  * Treino em todas as outras datas
-  * Teste na data corrente
-* Métricas por fold e agregadas:
+Para cada fold:
 
-  * **R²**
-  * **RMSE**
-  * **MAE**
+Treino em todas as outras datas
+
+Teste na data corrente
+
+Métricas por fold e agregadas:
+
+R²
+
+RMSE
+
+MAE
 
 Resultados consolidados:
 
-* `reports/progress/UFMS_MASTER_LODO_all.csv`
-* `reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv`
-* `reports/progress/UFMS_FINALS_best.csv`
+reports/progress/UFMS_MASTER_LODO_all.csv
 
-### 4.2 K-Fold e GroupKFold (sanidade)
+reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv
+
+reports/progress/UFMS_FINALS_best.csv
+
+4.2 K-Fold e GroupKFold (sanidade)
 
 Além do LODO, foram rodadas validações adicionais:
 
-* **K-Fold** simples por amostra
-* **GroupKFold** usando `Date` como grupo
+K-Fold simples por amostra
+
+GroupKFold usando Date como grupo
 
 Objetivo:
 
-* Checar consistência das métricas
-* Observar se há overfitting por cenário
-* Comparar tendências entre diferentes esquemas de validação
+Checar consistência das métricas
+
+Observar se há overfitting por cenário
+
+Comparar tendências entre diferentes esquemas de validação
 
 Resultados:
 
-* `reports/progress/UFMS_MASTER_KFOLD_all.csv`
-* `reports/progress/UFMS_MASTER_GKF_all.csv`
+reports/progress/UFMS_MASTER_KFOLD_all.csv
 
----
+reports/progress/UFMS_MASTER_GKF_all.csv
 
-## 5. Modelos
+5. Modelos
+5.1 Modelos clássicos
 
-### 5.1 Modelos clássicos
+Naive (persistência)
 
-* **Naive (persistência)**
+Baseline obrigatório: previsão = último valor conhecido (por data/campanha ou estratégia equivalente).
 
-  * Baseline obrigatório: previsão = último valor conhecido (por data/campanha ou estratégia equivalente).
-* **Regressão Linear**
-* **Ridge Regression**
-* **Gradient Boosting Regressor** (sklearn)
-* **XGBoost Regressor** (`xgboost`)
+Regressão Linear
+
+Ridge Regression
+
+Gradient Boosting Regressor (sklearn)
+
+XGBoost Regressor (xgboost)
 
 Scripts principais:
 
-* `02_baseline_linear.py`
-* `02b_baseline_ridge.py`
-* `03_baseline_gb.py`
-* `04_baseline_xgb.py`
+02_baseline_linear.py
 
-### 5.2 Modelos neurais
+02b_baseline_ridge.py
 
-* **MLP**
+03_baseline_gb.py
 
-  * Em fases iniciais: às vezes `sklearn.MLPRegressor`
-  * Em fases posteriores: implementações em PyTorch
-  * Script base: `05_baseline_mlp.py`
-* **KAN**
+04_baseline_xgb.py
 
-  * Scripts do tipo `01_*_kan*.py`
-* **XNet**
+5.2 Modelos neurais
 
-  * Scripts do tipo `01_*_xnet*.py`
+MLP
 
-Para KAN e XNet também existem variantes com **feature selection** (FS), com sufixos como `_fs`.
+Em fases iniciais: às vezes sklearn.MLPRegressor
 
----
+Em fases posteriores: implementações em PyTorch
 
-## 6. Seleção de features (FS) via XGBoost
+Script base: 05_baseline_mlp.py
 
-### 6.1 Estratégia de FS
+KAN
 
-1. Rodar **XGBoost** em cada cenário (base × alvo × clima/noclim) com validação **LODO por data**.
-2. Em cada fold:
+Scripts do tipo 01_*_kan*.py
 
-   * Extrair a importância das features por **ganho**.
-3. Agregar as importâncias:
+XNet
 
-   * Média/mediana do ganho por feature.
-   * Frequência com que cada feature aparece no **top-K** (ex.: top-15) em cada fold.
-4. Definir um conjunto de features **estáveis** por cenário:
+Scripts do tipo 01_*_xnet*.py
 
-   * Em geral, **FS15** = top-15 features mais importantes/estáveis.
+Para KAN e XNet também existem variantes com feature selection (FS), com sufixos como _fs.
+
+6. Seleção de features (FS) via XGBoost
+6.1 Estratégia de FS
+
+Rodar XGBoost em cada cenário (base × alvo × clima/noclim) com validação LODO por data.
+
+Em cada fold:
+
+Extrair a importância das features por ganho.
+
+Agregar as importâncias:
+
+Média/mediana do ganho por feature.
+
+Frequência com que cada feature aparece no top-K (ex.: top-15) em cada fold.
+
+Definir um conjunto de features estáveis por cenário:
+
+Em geral, FS15 = top-15 features mais importantes/estáveis.
 
 Arquivos de referência (nomes podem variar):
 
-* `reports/progress/feature_importance_xgb_stability_CP.csv`
-* `reports/progress/feature_importance_xgb_stability_TDN_based_ADF.csv`
-* Arquivos com listas das features selecionadas (ex.: `UFMS_FS_selected_*.txt`)
+reports/progress/feature_importance_xgb_stability_CP.csv
 
-### 6.2 Re-treino com FS (FS15)
+reports/progress/feature_importance_xgb_stability_TDN_based_ADF.csv
+
+Arquivos com listas das features selecionadas (ex.: UFMS_FS_selected_*.txt)
+
+6.2 Re-treino com FS (FS15)
 
 Depois de definir os conjuntos FS, foram re-treinados, cenário a cenário:
 
-* Ridge
-* GB
-* XGB
-* MLP
-* KAN
-* XNet
+Ridge
 
-Comparações “full features” vs **FS15**:
+GB
 
-* `reports/progress/UFMS_FINAL_REPORT_FS15_LODO.md`
-* `reports/progress/UFMS_TUNED_all.csv`
-* `reports/progress/UFMS_TUNED_vs_FINALS.csv`
+XGB
+
+MLP
+
+KAN
+
+XNet
+
+Comparações “full features” vs FS15:
+
+reports/progress/UFMS_FINAL_REPORT_FS15_LODO.md
+
+reports/progress/UFMS_TUNED_all.csv
+
+reports/progress/UFMS_TUNED_vs_FINALS.csv
 
 Resumo empírico:
 
-* **FS melhora claramente**:
+FS melhora claramente:
 
-  * Ridge, GB, XGB (reduz variância, melhora R² em vários cenários)
-* **FS é neutra ou pior**:
+Ridge, GB, XGB (reduz variância, melhora R² em vários cenários)
 
-  * MLP, KAN, XNet — especialmente em TDN com clima (perda de capacidade de representação em redes mais pesadas).
+FS é neutra ou pior:
 
----
+MLP, KAN, XNet — especialmente em TDN com clima (perda de capacidade de representação em redes mais pesadas).
 
-## 7. Resultados principais
+7. Resultados principais
 
 Artefatos consolidados mais importantes:
 
-* `reports/progress/UFMS_MASTER_metrics_all.csv`
-  → Tabela “mestre” com todas as execuções registradas (modelos, cenários, métricas).
+reports/progress/UFMS_MASTER_metrics_all.csv
+→ Tabela “mestre” com todas as execuções registradas (modelos, cenários, métricas).
 
-* `reports/progress/UFMS_MASTER_LODO_all.csv`
-  → Subconjunto focado nas execuções com validação **LODO**.
+reports/progress/UFMS_MASTER_LODO_all.csv
+→ Subconjunto focado nas execuções com validação LODO.
 
-* `reports/progress/UFMS_MASTER_KFOLD_all.csv`
-  → Execuções com **K-Fold**.
+reports/progress/UFMS_MASTER_KFOLD_all.csv
+→ Execuções com K-Fold.
 
-* `reports/progress/UFMS_MASTER_GKF_all.csv`
-  → Execuções com **GroupKFold** (por data).
+reports/progress/UFMS_MASTER_GKF_all.csv
+→ Execuções com GroupKFold (por data).
 
-* `reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv`
-  → Campeões por cenário (melhor modelo em cada combinação base × alvo × clima).
+reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv
+→ Campeões por cenário (melhor modelo em cada combinação base × alvo × clima).
 
-* `reports/progress/UFMS_FINALS_best.csv`
-  → **Melhores modelos oficiais** por cenário.
+reports/progress/UFMS_FINALS_best.csv
+→ Melhores modelos oficiais por cenário.
 
-* `reports/progress/UFMS_CHAMPIONS_LODO.md`
-  → Explicação textual dos campeões LODO.
+reports/progress/UFMS_CHAMPIONS_LODO.md
+→ Explicação textual dos campeões LODO.
 
-* `reports/progress/UFMS_FINAL_REPORT_FS15_LODO.md`
-  → Análise final levando em conta a seleção de features (FS15).
+reports/progress/UFMS_FINAL_REPORT_FS15_LODO.md
+→ Análise final levando em conta a seleção de features (FS15).
 
-* `reports/progress/SUMMARY_DISCOVERY.md`
-  → Narrativa geral das principais descobertas.
+reports/progress/SUMMARY_DISCOVERY.md
+→ Narrativa geral das principais descobertas.
 
-### 7.1 Resumo científico (alto nível)
+7.1 Resumo científico (alto nível)
 
-* **CP (Proteína Bruta)**:
+CP (Proteína Bruta):
 
-  * Apresenta **sinal previsível** com S2 + clima.
-  * R² em LODO geralmente na faixa **0,30–0,45** nos cenários mais difíceis.
-  * Em configurações mais favoráveis (por data, agregações específicas), pode chegar a **~0,60–0,70**.
+Apresenta sinal previsível com S2 + clima.
 
-* **TDN_based_ADF**:
+R² em LODO geralmente na faixa 0,30–0,45 nos cenários mais difíceis.
 
-  * Muito mais difícil de prever com S2 + clima.
-  * Mesmo com clima e FS, R² em ablações conservadoras muitas vezes próximo de **0,00–0,15**.
-  * Melhores resultados típicos com **árvores (GB/XGB)**, mas com maior sensibilidade a cenário.
+Em configurações mais favoráveis (por data, agregações específicas), pode chegar a ~0,60–0,70.
 
-* **Modelos de árvore (GB/XGB)**:
+TDN_based_ADF:
 
-  * Tendem a ser mais estáveis e competitivos em boa parte dos cenários.
-  * Redes (MLP, KAN, XNet) têm ganhos pontuais, mas não superam consistentemente GB/XGB.
+Muito mais difícil de prever com S2 + clima.
 
----
+Mesmo com clima e FS, R² em ablações conservadoras muitas vezes próximo de 0,00–0,15.
 
-## 8. Ambiente e execução
+Melhores resultados típicos com árvores (GB/XGB), mas com maior sensibilidade a cenário.
 
-### 8.1 Ambiente Docker
+Modelos de árvore (GB/XGB):
+
+Tendem a ser mais estáveis e competitivos em boa parte dos cenários.
+
+Redes (MLP, KAN, XNet) têm ganhos pontuais, mas não superam consistentemente GB/XGB.
+
+8. Ambiente e execução
+8.1 Ambiente Docker
 
 O projeto foi configurado para rodar em container com ou sem GPU:
 
-* Base: imagem NVIDIA de deep learning (ex.: CUDA 12.x)
-* Python: 3.10.x
-* Bibliotecas principais:
+Base: imagem NVIDIA de deep learning (ex.: CUDA 12.x)
 
-  * `numpy`, `pandas`, `scikit-learn`
-  * `xgboost`
-  * `torch` (PyTorch)
-  * Outras utilidades (ver `requirements.txt` / Dockerfile se presentes)
+Python: 3.10.x
+
+Bibliotecas principais:
+
+numpy, pandas, scikit-learn
+
+xgboost
+
+torch (PyTorch)
+
+Outras utilidades (ver requirements.txt / Dockerfile se presentes)
 
 Pontos de montagem:
 
-* `/workspace` (raiz do projeto dentro do container)
+/workspace (raiz do projeto dentro do container)
 
-  * Código: `/workspace/src`
-  * Dados: `/workspace/data`
-  * Relatórios: `/workspace/reports`
+Código: /workspace/src
 
-### 8.2 Exemplo de execução (genérico)
+Dados: /workspace/data
+
+Relatórios: /workspace/reports
+
+8.2 Exemplo de execução (genérico)
 
 Exemplo ilustrativo de chamada para MLP (os argumentos exatos podem variar):
 
-Dentro do container em `/workspace`:
+Dentro do container em /workspace:
 
 export PYTHONPATH=/workspace/src:$PYTHONPATH
 
 python src/05_baseline_mlp.py \
---csv data_raw/Complete_DataSet.csv \
---date-col Date \
---target-col CP \
---scenario D5 \
---with-climate \
---val-scheme LODO \
---out reports/exp01_D5_CP_mlp_clim_lodo.csv
+  --csv data/data_raw/Complete_DataSet.csv \
+  --date-col Date \
+  --target-col CP \
+  --scenario D5 \
+  --with-climate \
+  --val-scheme LODO \
+  --out reports/exp01_D5_CP_mlp_clim_lodo.csv
 
-> Consulte o cabeçalho de cada script em `src/` para ver a assinatura real (nomes de flags e opções disponíveis).
 
----
+Consulte o cabeçalho de cada script em src/ para ver a assinatura real (nomes de flags e opções disponíveis).
 
-## 9. Histórico do dataset (nota importante)
+9. Histórico do dataset (nota importante)
 
 Para evitar confusão:
 
-1. **Fase inicial**
+Fase inicial
 
-   * `data_processed/Complete_Dataset.csv` era considerado o **dataset oficial**.
-   * A partir dele, eram gerados CSVs físicos como `ufms_D5_*`, `ufms_D7_*` em disco.
+data/data_processed/Complete_Dataset.csv era considerado o dataset oficial.
 
-2. **Fase atual (oficial)**
+A partir dele, eram gerados CSVs físicos como ufms_D5_*, ufms_D7_* em disco.
 
-   * `data_raw/Complete_DataSet.csv` é o **arquivo mestre imutável**.
-   * `data_processed/Complete_Dataset.csv` virou **snapshot histórico**.
-   * Cenários D5/D7 e clim/noclim são derivados **em memória** a partir do mestre bruto.
+Fase atual (oficial)
+
+data/data_raw/Complete_DataSet.csv é o arquivo mestre imutável.
+
+data/data_processed/Complete_Dataset.csv virou snapshot histórico.
+
+Cenários D5/D7 e clim/noclim são derivados em memória a partir do mestre bruto.
 
 Na dissertação e documentos finais, esta filosofia atual (arquivo mestre + derivação em memória) é a versão a ser considerada como “oficial”.
 
----
+10. Diário de bordo (RUN_LOG)
 
-## 10. Diário de bordo (RUN_LOG)
-
-* **Arquivo:** `RUN_LOG.md`
+Arquivo: RUN_LOG.md
 
 Usado como diário de bordo operacional, registra:
 
-* Data e comando executado
-* Script e parâmetros principais
-* Caminho dos outputs gerados
-* Observações rápidas de resultados (R², problemas, bugs)
+Data e comando executado
+
+Script e parâmetros principais
+
+Caminho dos outputs gerados
+
+Observações rápidas de resultados (R², problemas, bugs)
 
 Recomendação:
 
-* Consultar o `RUN_LOG.md` em paralelo a este README para reconstruir a linha do tempo das experiências e entender a evolução dos modelos/cenários.
+Consultar o RUN_LOG.md em paralelo a este README para reconstruir a linha do tempo das experiências e entender a evolução dos modelos/cenários.
+EOF
+
+
+Depois disso:
+
+```bash
+cd /workspace
+git status -sb
+git diff README.md
+
+
+Se estiver tudo ok:
+
+git add README.md
+git commit -m "Fix README dataset paths and structure"
+git push origin main
+
+
+Aí o README fica redondo no GitHub, sem mentira de caminho.
