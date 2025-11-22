@@ -21,7 +21,7 @@ Usei imagens Sentinel-2 (e derivados) e variáveis climáticas para prever CP e 
   - O sinal espectral de Sentinel-2, combinado com clima, é suficiente para capturar parte relevante da variabilidade de CP.
   - Para TDN, o sinal disponível é fraco; o modelo tem pouca informação para separar amostras com TDN diferentes.
 
-Conclusão 1:  
+**Conclusão 1**  
 Com o dataset atual, CP está relativamente próximo do limite de previsibilidade via sensoriamento remoto + clima. Já TDN exige novas fontes de informação (solo, manejo, água, dados laboratoriais adicionais) para que se obtenham ganhos significativos.
 
 ---
@@ -34,7 +34,7 @@ Com o dataset atual, CP está relativamente próximo do limite de previsibilidad
   - Modelos baseados em árvores (GB, XGB) e modelos lineares (Ridge) se mantêm mais estáveis.
 - Em cenário real de uso (previsão por data/campanha), os modelos de árvore tendem a ser superiores ou, no mínimo, mais confiáveis.
 
-Conclusão 2:  
+**Conclusão 2**  
 Para este dataset temporal pequeno, redes profundas vencem no cenário embaralhado (K-Fold i.i.d.), mas perdem para modelos de árvore quando a validação respeita o uso real (LODO por data).
 
 ---
@@ -47,7 +47,7 @@ Para este dataset temporal pequeno, redes profundas vencem no cenário embaralha
   - Clima captura variações fisiológicas da planta ligadas à proteína bruta (CP).
   - Para TDN, a limitação principal parece ser a natureza do alvo e a falta de informações adicionais, não apenas o clima.
 
-Conclusão 3:  
+**Conclusão 3**  
 O clima é um componente importante para melhorar a predição de CP, mas não é suficiente para resolver a baixa previsibilidade de TDN.
 
 ---
@@ -64,7 +64,7 @@ O clima é um componente importante para melhorar a predição de CP, mas não �
   - Modelos de árvore e lineares se beneficiam de um espaço de entrada mais enxuto e estável.
   - Redes profundas preferem um espaço de entrada mais rico, mesmo em regime de poucos dados, delegando ao próprio modelo a seleção interna de representações.
 
-Conclusão 4:  
+**Conclusão 4**  
 Modelos estruturados (árvores e Ridge) ganham com seleção de atributos explícita. Redes profundas tendem a ganhar mais com mais dados e menos poda de atributos.
 
 ---
@@ -81,7 +81,7 @@ Modelos estruturados (árvores e Ridge) ganham com seleção de atributos explí
   - diversidade espectral e espacial,
   - integração com outras fontes (solo, manejo, laboratório).
 
-Conclusão 5:  
+**Conclusão 5**  
 O limite atual é a densidade temporal e espectral do dataset, não a ausência de modelos sofisticados. Isso abre caminho direto para um doutorado focado em mais dados (tempo, espaço, espectro) e integração de fontes.
 
 ---
@@ -121,45 +121,55 @@ O limite atual é a densidade temporal e espectral do dataset, não a ausência 
 
 ## 4. Tabela geral de métricas (LODO por data)
 
-Esta seção resume, em uma única tabela, as principais métricas de todos os cenários e arquiteturas avaliados sob validação LODO por data.
+Esta seção resume, em uma única tabela, as principais métricas de todos os cenários e arquiteturas avaliados sob validação LODO por data, conforme extração atual de `UFMS_ALLMODELS_metrics_LODO.csv`.  
+A tabela abaixo apresenta, para cada combinação de base, alvo e modelo, os valores de RMSE e MAE.
 
-As informações detalhadas estão consolidadas em:
-
-- `reports/progress/UFMS_ALLMODELS_metrics_LODO.csv`
-
-e, em versões resumidas, em:
-
-- `reports/progress/UFMS_FINALS_best.csv`
-- `reports/progress/R2_TABLES_FINAL.md`
-
-A tabela abaixo deve listar, para cada combinação de:
-
-- base (RAW, D5, D7),
-- janela (quando aplicável),
-- uso de clima (com ou sem),
-- alvo (CP, TDN_based_ADF),
-- família de modelo (Naive, Linear, Ridge, GB, XGB, MLP, KAN, XNet),
-- uso ou não de FS15,
-- métricas principais (R² OOF global, R² médio por data, RMSE, MAE),
-- referência para o arquivo de saída correspondente.
-
-### 4.1 Tabela completa de métricas por cenário e arquitetura
-
-> Observação: os valores numéricos devem ser gerados a partir dos arquivos em `reports/progress/`, em especial `UFMS_ALLMODELS_metrics_LODO.csv`.  
-> Abaixo está o formato sugerido da tabela.
+### 4.1 Tabela de RMSE e MAE por cenário e arquitetura
 
 <!-- TABELA_METRICAS_INICIO -->
 
-| Base | Janela | Clima | Target           | Modelo | FS15 | R2_OOF | R2_MEDIA_DATA | RMSE | MAE | Arquivo_relatorio |
-|------|--------|-------|------------------|--------|------|--------|----------------|------|-----|--------------------|
-| ...  | ...    | ...   | ...              | ...    | ...  | ...    | ...            | ...  | ... | ...                |
-
-<!--
-Preencher esta tabela com todas as linhas geradas a partir de UFMS_ALLMODELS_metrics_LODO.csv
-ou do conjunto equivalente de relatórios finais.
--->
+| Base | Target | Modelo | RMSE | MAE |
+| --- | --- | --- | --- | --- |
+| D5 | CP | hgb | 1.7076843802476165 | 1.509169113604525 |
+| D5 | CP | hgb | 1.8573575964676663 | 1.6121471912384209 |
+| D5 | CP | mlp | 2.0855283222591114 | 1.826178086766212 |
+| D5 | CP | mlp | 2.0080263420406768 | 1.6712170377076514 |
+| D5 | CP | xgbnative | 1.4405780742813286 | 1.239695415392295 |
+| D5 | CP | xgbnative | 1.5095069452624854 | 1.301528256670904 |
+| D5 | TDN_based_ADF | hgb | 4.213774305147418 | 3.394144441111956 |
+| D5 | TDN_based_ADF | hgb | 4.232977820218472 | 3.4171054348769347 |
+| D5 | TDN_based_ADF | mlp | 13.641937415856042 | 12.069372442597874 |
+| D5 | TDN_based_ADF | mlp | 16.035791449301108 | 13.710463036138938 |
+| D5 | TDN_based_ADF | xgbnative | 3.7067429605464186 | 3.0258371634075343 |
+| D5 | TDN_based_ADF | xgbnative | 3.5839108210817234 | 2.935216638361731 |
+| D7 | CP | hgb | 1.7044349998455677 | 1.452962141760588 |
+| D7 | CP | hgb | 1.6928684977905055 | 1.4311617729581068 |
+| D7 | CP | mlp | 1.9904758656405213 | 1.7432565003526674 |
+| D7 | CP | mlp | 1.8820470190144811 | 1.558792400399006 |
+| D7 | CP | xgbnative | 1.3648064394753845 | 1.1459560087738894 |
+| D7 | CP | xgbnative | 1.4908775358431952 | 1.2443734077710915 |
+| D7 | TDN_based_ADF | hgb | 4.105241059469466 | 3.3808398378777285 |
+| D7 | TDN_based_ADF | hgb | 3.987981165893757 | 3.272959461576538 |
+| D7 | TDN_based_ADF | mlp | 15.017380026336657 | 13.392603659026106 |
+| D7 | TDN_based_ADF | mlp | 17.47027217938148 | 14.509369945451851 |
+| D7 | TDN_based_ADF | xgbnative | 3.480854717050311 | 2.8414824414953848 |
+| D7 | TDN_based_ADF | xgbnative | 3.5089986006918634 | 2.8808439490660525 |
+| RAW | CP | hgb | 1.801987359463876 | 1.5465654460062688 |
+| RAW | CP | hgb | 1.8324260556322451 | 1.5410807357849994 |
+| RAW | CP | mlp | 2.170974045698828 | 1.901270310481974 |
+| RAW | CP | mlp | 2.018073825715295 | 1.7018142598313435 |
+| RAW | CP | xgbnative | 1.5421853259792075 | 1.3094597773727272 |
+| RAW | CP | xgbnative | 1.534104432128412 | 1.2731842812875311 |
+| RAW | TDN_based_ADF | hgb | 4.119794307603398 | 3.420516229970641 |
+| RAW | TDN_based_ADF | hgb | 4.170787387177113 | 3.4669636528623147 |
+| RAW | TDN_based_ADF | mlp | 11.681998553372011 | 10.473945786908818 |
+| RAW | TDN_based_ADF | mlp | 17.06850772631298 | 15.333801223013054 |
+| RAW | TDN_based_ADF | xgbnative | 3.4683987798491493 | 2.8130972372441176 |
+| RAW | TDN_based_ADF | xgbnative | 3.4475272562210453 | 2.830975761222126 |
 
 <!-- TABELA_METRICAS_FIM -->
+
+> Nota: nesta extração estão apenas as colunas RMSE e MAE para os modelos hgb (GB/HistGB), mlp e xgbnative nos cenários RAW, D5 e D7, para CP e TDN_based_ADF. As métricas completas (incluindo R² global e por data, e demais modelos) continuam disponíveis em `UFMS_ALLMODELS_metrics_LODO.csv` e nas tabelas específicas de R².
 
 ---
 
