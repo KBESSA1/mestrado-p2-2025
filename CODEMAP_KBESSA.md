@@ -3,8 +3,10 @@
 Visão organizada do que existe em `src/` dentro do container, **do ponto de vista de uso**  
 (onde mexer para: baseline, LODO, FS, HLS, etc.).
 
-> Regra de ouro: quando for apresentar algo pro Takashi, comece por  
-> `02_baseline_*`, `01_*_cp_*`, `01_*_tdn_*`, `utils_lodo.py` e scripts de FS/XGB.
+> Regra de bolso pra explicar pro Takashi:
+> - Seções 1 e 2 → “como eu rodei os modelos em LODO por cenário”.
+> - Seção 7 → “como eu fiz seleção de atributos”.
+> - Seção 6 → “como nasceram as bandas/índices (HLS/S2)”.
 
 ---
 
@@ -24,6 +26,7 @@ Scripts “genéricos”, que não amarram cenário (D5/D7/clim/noclim) no nome:
   - Baseline MLP (sklearn/PyTorch, dependendo da fase).
 
 Uso típico:
+
 - Servem como **baseline por cenário** (definindo CSV + target + esquema de CV via argumentos).
 - Hoje, os resultados consolidados estão em `UFMS_MASTER_*`, então esses scripts são mais para **replay/pedagógico**.
 
@@ -31,7 +34,7 @@ Uso típico:
 
 ## 2. Experimentos LODO por cenário (CP/TDN, D5/D7, clim/noclim, modelo)
 
-Scripts 01_* amarram **CP/TDN × base (D5/D7) × clima on/off × modelo**.
+Scripts `01_*` amarram **CP/TDN × base (D5/D7) × clima on/off × modelo** e já usam LODO correto.
 
 ### 2.1 CP — D5/D7 × clim/noclim × modelos
 
@@ -115,20 +118,20 @@ Scripts 01_* amarram **CP/TDN × base (D5/D7) × clima on/off × modelo**.
 - `01_tdn_D7_noclim_xnet.py`
 
 > **Resumo mental:**  
-> 01_cp_* → CP  
-> 01_tdn_* → TDN_based_ADF  
+> `01_cp_*` → CP  
+> `01_tdn_*` → TDN_based_ADF  
 > Sufixos dizem **base (D5/D7)**, **clima (clim/noclim)** e **modelo (gb/mlp/xgb/kan/xnet/naive/linear/ridge)**.
 
 ---
 
 ## 3. Funções utilitárias / helpers gerais
 
-- `00_utils_lodo.py`  
-  - Versão antiga/auxiliar de utilitários de LODO (mantida por histórico).
 - `utils_lodo.py`  
   - **Versão oficial** das funções de LODO (group por `Date`, splits, etc.).
+- `00_utils_lodo.py`  
+  - Versão antiga/auxiliar de utilitários de LODO (mantida por histórico).
 - `sitecustomize.py`  
-  - Ajustes globais de ambiente (paths, prints amigáveis, etc).
+  - Ajustes globais de ambiente (PATH, prints, etc).
 - `ping.py`  
   - Script de teste rápido (importar libs, checar ambiente).
 
@@ -139,7 +142,7 @@ Scripts 01_* amarram **CP/TDN × base (D5/D7) × clima on/off × modelo**.
 - `_compare_lodo_vs_gkf.py`  
   - Compara resultados LODO vs GroupKFold (sanidade metodológica).
 - `_eval_groupkfold.py`  
-  - Avaliações mais focadas em GroupKFold.
+  - Avaliações focadas em GroupKFold.
 
 - `compare_climate_gains.py`  
   - Análises de **ganho com clima** vs **sem clima**.
@@ -148,9 +151,8 @@ Scripts 01_* amarram **CP/TDN × base (D5/D7) × clima on/off × modelo**.
   - Utilitário para selecionar subconjuntos de features (auxiliar de FS).
 - `feature_config.py`  
   - Configurações de features (listas, grupos, etc).
-
 - `lit_feature_filter.py`  
-  - Filtro de features relacionado ao “lit”/paper (seleções guiadas por literatura).
+  - Filtro de features guiado por literatura (“lit”).
 
 - `progress_dashboard.py`  
   - Dashboard textual/plots para acompanhar evolução dos experimentos (lê `UFMS_MASTER_*`).
@@ -159,7 +161,7 @@ Scripts 01_* amarram **CP/TDN × base (D5/D7) × clima on/off × modelo**.
   - Script de sandbox para testar alguma ideia rápida com o dataset.
 
 - `run_exp01.py`  
-  - Orquestrador de uma bateria de experimentos “exp01” (primeiras rodadas).
+  - Orquestrador da bateria de experimentos “exp01” (primeiras rodadas).
 - `run_with_climate_raw.py`  
   - Rodadas específicas no cenário RAW com clima.
 
@@ -167,16 +169,19 @@ Scripts 01_* amarram **CP/TDN × base (D5/D7) × clima on/off × modelo**.
 - `05_baseline_mlp.backup.preproc.py`  
   - Backups históricos da evolução do baseline MLP (não usar como fonte principal agora).
 
+- `__init__.py`  
+  - Marca `src` como pacote Python (importável com `PYTHONPATH=/workspace/src`).
+
 ---
 
 ## 5. Runners auxiliares de cross-validation / grid search
 
-- `_gb_cv_runner.py`  
-- `_hgb_cv_runner.py`  
-- `_mlp_cv_runner.py`  
-- `_xgb_cv_runner.py`  
-- `_xgb_cv_runner_native.py`  
-- `_xgb_native_cv_runner.py`  
+- `_gb_cv_runner.py`
+- `_hgb_cv_runner.py`
+- `_mlp_cv_runner.py`
+- `_xgb_cv_runner.py`
+- `_xgb_cv_runner_native.py`
+- `_xgb_native_cv_runner.py`
 
 Esses scripts:
 
@@ -185,7 +190,8 @@ Esses scripts:
 - Alimentam os CSVs de tuning que depois entraram em  
   `UFMS_TUNED_all.csv` e `UFMS_TUNED_vs_FINALS.csv`.
 
-> Regra prática atual: usar `_gb_cv_runner.py` e `_xgb_cv_runner_native.py` como referência de **como** foi feito tuning/FS para explicar ao Takashi.
+> Hoje, `_gb_cv_runner.py` e `_xgb_cv_runner_native.py` são os principais de referência  
+> pra explicar **como** foi feito tuning/FS pro Takashi.
 
 ---
 
@@ -198,22 +204,19 @@ Pasta `datasets/` e afins:
 - `datasets/make_hls_s2_bands.backup.py`  
 - `datasets/make_hls_s2_bands.procpatch.backup.py`  
 - `datasets/make_hls_s2_bands.qcpatch.backup.py`  
-  - Versões anteriores/patcheadas (histórico, não mexer a menos que precise auditar).
+  - Versões anteriores/patcheadas (histórico, só olhar se precisar auditar).
 
-- `datasets/__pycache__/make_hls_s2_bands.cpython-310.pyc`  
-  - Apenas cache (ignorar).
-
-Scripts auxiliares de HLS:
+Scripts auxiliares de HLS/S2:
 
 - `hls_extract_fill_bands.py`
-- `hls_extract_fill_bands_v2.py`
+- `hls_extract_fill_bands_v2.py`  
   - Tratamento de bandas faltantes / preenchimento.
 
 - `hls_manifest_s2.py`
-- `hls_manifest_s2_cmr.py`
+- `hls_manifest_s2_cmr.py`  
   - Criação/uso de manifest de cenas S2/HLS (listagem por data/área).
 
-- `make_hls_datasets.py`
+- `make_hls_datasets.py`  
   - Geração de datasets HLS/S2 a partir dos manifests.
 
 ---
@@ -251,7 +254,7 @@ Scripts auxiliares de HLS:
 ### 7.3 Importâncias de features e geração de FS15
 
 - `02_feature_importance_xgb_all.py`  
-  - Roda XGBoost em todos cenários e guarda importâncias (ganho) fold-wise.
+  - Roda XGBoost em todos cenários e guarda importâncias (ganho) fold a fold.
 - `03_feature_importance_summary.py`  
   - Agrega importâncias por cenário (média/mediana, frequência em top-K).
 
@@ -271,15 +274,13 @@ Na raiz de `src/`:
 
 - `make_policy_symlinks.sh`  
   - Cria symlinks de políticas/arquivos de config (legacy/organização).
-
-Na raiz do projeto (`/workspace`):
-
 - `run_final_baselines.sh`  
   - Script para rodar um conjunto final de baselines (LODO) de forma automatizada.
 
-> Ver também:
-> - `/workspace/run_gkf_all.sh`
-> - `/workspace/scripts/cleanup_reports.sh`
+(Ver também na raiz do projeto `/workspace`):
+
+- `run_gkf_all.sh`  
+- `/workspace/scripts/cleanup_reports.sh`
 
 ---
 
@@ -290,10 +291,7 @@ Na raiz do projeto (`/workspace`):
   - Backups dos scripts de baseline GB/XGB quando foram mexidos (indent/argparse etc.).
 
 - `lit_prior.yaml`  
-  - Configuração/priors relacionada ao “lit”/paper (mais meta dado que código).
-
-- `__init__.py`  
-  - Marca `src` como pacote Python (importável via `PYTHONPATH=/workspace/src`).
+  - Configuração/priors relacionada ao “lit”/paper (mais metadado que código).
 
 - Arquivos `__pycache__/...`  
   - Apenas caches do Python; podem ser ignorados.
@@ -302,17 +300,18 @@ Na raiz do projeto (`/workspace`):
 
 ## 10. Como usar este mapa (rota mental)
 
-- Precisa **reproduzir um resultado LODO**?  
+- Quer **reproduzir um resultado LODO**?  
   → olhar **Seção 2** (scripts `01_*`) + `utils_lodo.py`.
 
-- Precisa explicar **baseline clássico** em aula/banca?  
+- Quer explicar **baseline clássico** em aula/banca?  
   → **Seção 1** (02/03/04/05 baselines) + `UFMS_MASTER_LODO_all.csv`.
 
 - Quer mostrar **efeito de clima**?  
-  → rodadas em Seção 2 (clim vs noclim) + `compare_climate_gains.py`.
+  → Seção 2 (clim vs noclim) + `compare_climate_gains.py`.
 
 - Quer falar de **FS / importâncias de features**?  
   → **Seção 7** (XGB FS + Ridge/GB FS) + `UFMS_FINAL_REPORT_FS15_LODO.md`.
 
 - Quer discutir **KFold vs LODO / overfitting metodológico**?  
-  → **Seção 5** (runners) + scripts `_compare_lodo_vs_gkf.py`, `_eval_groupkfold.py` e os CSVs `UFMS_MASTER_KFOLD_all.csv` vs `UFMS_MASTER_LODO_all.csv`.
+  → **Seção 5** (runners) + scripts `_compare_lodo_vs_gkf.py`, `_eval_groupkfold.py`  
+    e os CSVs `UFMS_MASTER_KFOLD_all.csv` vs `UFMS_MASTER_LODO_all.csv`.
