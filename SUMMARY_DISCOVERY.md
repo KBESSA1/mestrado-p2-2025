@@ -256,15 +256,97 @@ Contém, por linha:
 - R2, RMSE, MAE;  
 - caminho do arquivo de origem.
 
-### 4.2 LODO – campeões por cenário
+### 4.2 LODO – recorte tabular (D5/D7/RAW × CP/TDN × hgb/mlp/xgbnative, com/sem clima)
 
-Arquivo com **um campeão por combinação (Base × Target × Clima × FS)**, escolhido pelo maior R² (ou menor RMSE quando R² ausente):
+A tabela abaixo é um recorte explícito dos resultados **LODO** para os modelos **hgb**, **mlp** e **xgbnative** em **D5, D7 e RAW**, com e sem clima, para **CP** e **TDN_based_ADF**. Os valores foram extraídos diretamente de `UFMS_ALLMODELS_metrics_LODO.csv` (rodada exp02) e são coerentes com a consolidação do master.
 
-- `reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv`
-
-Se desejado, pode-se colar aqui uma tabela extraída diretamente desse CSV:
-
-```markdown
 <!-- TABELA_METRICAS_INICIO -->
-(cole aqui a tabela gerada por script a partir de UFMS_MASTER_LODO_champions_by_scenario.csv)
+
+| Base | Target | Modelo | Clima | FS | CV | R2 | RMSE | MAE | Arquivo |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| D5 | CP | hgb | clim | desconhecido | lodo | -0.304 | 1.708 | 1.509 | /workspace/reports/exp02/exp02_D5_CP_hgb_clim_lodo.csv |
+| D5 | CP | mlp | clim | desconhecido | lodo | -2.995 | 2.086 | 1.826 | /workspace/reports/exp02/exp02_D5_CP_mlp_clim_lodo.csv |
+| D5 | CP | xgbnative | clim | desconhecido | lodo | 0.082 | 1.441 | 1.240 | /workspace/reports/exp02/exp02_D5_CP_xgbnative_clim_lodo.csv |
+| D5 | CP | hgb | noclim | desconhecido | lodo | -0.552 | 1.857 | 1.612 | /workspace/reports/exp02/exp02_D5_CP_hgb_noclim_lodo.csv |
+| D5 | CP | mlp | noclim | desconhecido | lodo | -0.793 | 2.008 | 1.671 | /workspace/reports/exp02/exp02_D5_CP_mlp_noclim_lodo.csv |
+| D5 | CP | xgbnative | noclim | desconhecido | lodo | -0.010 | 1.510 | 1.302 | /workspace/reports/exp02/exp02_D5_CP_xgbnative_noclim_lodo.csv |
+| D5 | TDN_based_ADF | hgb | clim | desconhecido | lodo | -0.078 | 4.214 | 3.394 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_hgb_clim_lodo.csv |
+| D5 | TDN_based_ADF | mlp | clim | desconhecido | lodo | -13.999 | 13.642 | 12.069 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_mlp_clim_lodo.csv |
+| D5 | TDN_based_ADF | xgbnative | clim | desconhecido | lodo | 0.235 | 3.707 | 3.026 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_xgbnative_clim_lodo.csv |
+| D5 | TDN_based_ADF | hgb | noclim | desconhecido | lodo | -0.112 | 4.233 | 3.417 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_hgb_noclim_lodo.csv |
+| D5 | TDN_based_ADF | mlp | noclim | desconhecido | lodo | -18.160 | 16.036 | 13.710 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_mlp_noclim_lodo.csv |
+| D5 | TDN_based_ADF | xgbnative | noclim | desconhecido | lodo | 0.246 | 3.584 | 2.935 | /workspace/reports/exp02/exp02_D5_TDN_based_ADF_xgbnative_noclim_lodo.csv |
+| D7 | CP | hgb | clim | desconhecido | lodo | -0.310 | 1.704 | 1.453 | /workspace/reports/exp02/exp02_D7_CP_hgb_clim_lodo.csv |
+| D7 | CP | mlp | clim | desconhecido | lodo | -3.494 | 1.990 | 1.743 | /workspace/reports/exp02/exp02_D7_CP_mlp_clim_lodo.csv |
+| D7 | CP | xgbnative | clim | desconhecido | lodo | 0.176 | 1.365 | 1.146 | /workspace/reports/exp02/exp02_D7_CP_xgbnative_clim_lodo.csv |
+| D7 | CP | hgb | noclim | desconhecido | lodo | -0.257 | 1.693 | 1.431 | /workspace/reports/exp02/exp02_D7_CP_hgb_noclim_lodo.csv |
+| D7 | CP | mlp | noclim | desconhecido | lodo | -0.532 | 1.882 | 1.559 | /workspace/reports/exp02/exp02_D7_CP_mlp_noclim_lodo.csv |
+| D7 | CP | xgbnative | noclim | desconhecido | lodo | 0.037 | 1.491 | 1.244 | /workspace/reports/exp02/exp02_D7_CP_xgbnative_noclim_lodo.csv |
+| D7 | TDN_based_ADF | hgb | clim | desconhecido | lodo | 0.007 | 4.105 | 3.381 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_hgb_clim_lodo.csv |
+| D7 | TDN_based_ADF | mlp | clim | desconhecido | lodo | -18.901 | 15.017 | 13.393 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_mlp_clim_lodo.csv |
+| D7 | TDN_based_ADF | xgbnative | clim | desconhecido | lodo | 0.277 | 3.481 | 2.841 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_xgbnative_clim_lodo.csv |
+| D7 | TDN_based_ADF | hgb | noclim | desconhecido | lodo | 0.052 | 3.988 | 3.273 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_hgb_noclim_lodo.csv |
+| D7 | TDN_based_ADF | mlp | noclim | desconhecido | lodo | -23.160 | 17.470 | 14.509 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_mlp_noclim_lodo.csv |
+| D7 | TDN_based_ADF | xgbnative | noclim | desconhecido | lodo | 0.300 | 3.509 | 2.881 | /workspace/reports/exp02/exp02_D7_TDN_based_ADF_xgbnative_noclim_lodo.csv |
+| RAW | CP | hgb | clim | desconhecido | lodo | -0.064 | 1.802 | 1.547 | /workspace/reports/exp02/exp02_RAW_CP_hgb_clim_lodo.csv |
+| RAW | CP | mlp | clim | desconhecido | lodo | -1.699 | 2.171 | 1.901 | /workspace/reports/exp02/exp02_RAW_CP_mlp_clim_lodo.csv |
+| RAW | CP | xgbnative | clim | desconhecido | lodo | 0.221 | 1.542 | 1.309 | /workspace/reports/exp02/exp02_RAW_CP_xgbnative_clim_lodo.csv |
+| RAW | CP | hgb | noclim | desconhecido | lodo | -0.127 | 1.832 | 1.541 | /workspace/reports/exp02/exp02_RAW_CP_hgb_noclim_lodo.csv |
+| RAW | CP | mlp | noclim | desconhecido | lodo | -0.644 | 2.018 | 1.702 | /workspace/reports/exp02/exp02_RAW_CP_mlp_noclim_lodo.csv |
+| RAW | CP | xgbnative | noclim | desconhecido | lodo | 0.235 | 1.534 | 1.273 | /workspace/reports/exp02/exp02_RAW_CP_xgbnative_noclim_lodo.csv |
+| RAW | TDN_based_ADF | hgb | clim | desconhecido | lodo | 0.018 | 4.120 | 3.421 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_hgb_clim_lodo.csv |
+| RAW | TDN_based_ADF | mlp | clim | desconhecido | lodo | -8.506 | 11.682 | 10.474 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_mlp_clim_lodo.csv |
+| RAW | TDN_based_ADF | xgbnative | clim | desconhecido | lodo | 0.329 | 3.468 | 2.813 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_xgbnative_clim_lodo.csv |
+| RAW | TDN_based_ADF | hgb | noclim | desconhecido | lodo | 0.007 | 4.171 | 3.467 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_hgb_noclim_lodo.csv |
+| RAW | TDN_based_ADF | mlp | noclim | desconhecido | lodo | -22.669 | 17.069 | 15.334 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_mlp_noclim_lodo.csv |
+| RAW | TDN_based_ADF | xgbnative | noclim | desconhecido | lodo | 0.344 | 3.448 | 2.831 | /workspace/reports/exp02/exp02_RAW_TDN_based_ADF_xgbnative_noclim_lodo.csv |
+
 <!-- TABELA_METRICAS_FIM -->
+
+> Nota: esta tabela mostra um subconjunto específico (exp02) com hgb, mlp e xgbnative em D5/D7/RAW, com e sem clima, para CP e TDN_based_ADF. Os resultados finais de outras famílias (Naive, Linear, Ridge, KAN, XNet, FS on/off) e demais rodadas consolidadas estão em `UFMS_MASTER_LODO_all.csv` e em `UFMS_MASTER_LODO_champions_by_scenario.csv`.
+
+---
+
+## 5. Guia de leitura para o orientador
+
+Sugestão de roteiro:
+
+1. Ler este arquivo: `SUMMARY_DISCOVERY.md`  
+   → visão geral do que foi feito e dos resultados.
+2. Ver **campeões em LODO** em:  
+   `reports/progress/UFMS_MASTER_LODO_champions_by_scenario.csv`
+3. Conferir a **matriz completa LODO** (todos os modelos/cenários):  
+   `reports/progress/UFMS_MASTER_LODO_all.csv`
+4. Explorar os **R² organizados** (tabelas mais amigáveis):  
+   `reports/progress/R2_TABLES_FINAL.md`
+5. Ver **KFold vs LODO** para KAN/XNet:  
+   `reports/progress/UFMS_MASTER_KFOLD_all.csv`  
+   e os CSVs específicos de ablação em `reports/ablations/`.
+6. Examinar a política de FS e os conjuntos de atributos:  
+   `data/feature_sets/` e `data/feature_selected/`.
+
+---
+
+## 6. Conclusão geral
+
+Este trabalho mostra, de forma quantitativa e reprodutível, que:
+
+- **CP** é moderadamente previsível em LODO com Sentinel-2 + clima, enquanto  
+- **TDN_based_ADF** apresenta baixa previsibilidade com as fontes atuais.
+
+Em termos de modelos:
+
+- **Árvores/ensembles (GB/XGBoost)** são os mais robustos em LODO,  
+- **Redes profundas (MLP, KAN, XNet)** brilham apenas sob validação embaralhada (KFold),  
+- e a diferença LODO vs KFold ilustra claramente o risco de **overfitting metodológico** em estudos de sensoriamento remoto agrícola.
+
+Por outro lado, os experimentos também mostram que:
+
+- o gargalo principal não é a arquitetura, mas sim o **volume e a riqueza dos dados** (temporal, espectral e agronômica);  
+- há um caminho natural de **continuidade em doutorado** explorando:
+  - maior densidade temporal,  
+  - múltiplos sensores e bandas,  
+  - variáveis de manejo, solo e laboratório mais completas,  
+  - e uma exploração mais profunda de KAN/XNet em regime temporal realista, com maior volume de dados por campanha.
+
+Este repositório, com seus arquivos “master” de métricas e scripts de experimentos, documenta essa trajetória de forma que outros pesquisadores possam replicar, criticar e estender o trabalho.
